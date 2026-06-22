@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 24px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo p { font-size: 12px; color: #6b7280; margin-top: 5px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
+        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: #2563eb; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
+        .success-msg { color: #16a34a; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
+        .bottom-link { text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280; }
+        .bottom-link a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">
+        <h1>🌍 全球声音</h1>
+        <p>欢迎回来，世界在等你</p>
+    </div>
+    <div class="form-group">
+        <label>邮箱地址</label>
+        <input type="email" id="email" class="form-input" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="password" class="form-input" placeholder="请输入密码">
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+    <button class="submit-btn" id="submitBtn" onclick="handleLogin()">登录</button>
+    <div class="bottom-link" style="margin-top:20px;">还没有账号？<a href="register.html">立即注册</a></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    async function handleLogin() {
+        const btn = document.getElementById('submitBtn');
+        const errBox = document.getElementById('errorMsg');
+        const sucBox = document.getElementById('successMsg');
+        errBox.innerText = '';
+        sucBox.innerText = '';
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) {
+            errBox.innerText = '请填写邮箱和密码';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = '正在验证身份...';
+
+        try {
+            const { data, error } = await client.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) throw error;
+
+            sucBox.innerText = '登录成功！正在跳转...';
+            btn.innerText = '登录成功 ✓';
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+
+        } catch (error) {
+            errBox.innerText = '登录失败: ' + (error.message || '邮箱或密码错误');
+            btn.disabled = false;
+            btn.innerText = '登录';
+        }
+    }
+
+    // 回车键触发登录
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+</script>
+</body>
+</html>

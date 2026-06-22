@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
+
+        .top-nav { background: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
+        .logo { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .user-badge { display: flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+        .country-tabs { background: white; padding: 12px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #f0f1f3; }
+        .country-tabs::-webkit-scrollbar { display: none; }
+        .tab { flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #6b7280; background: #f3f4f6; cursor: pointer; border: none; }
+        .tab.active { background: #1a1a2e; color: white; }
+
+        .feed { padding: 16px; }
+        .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 4px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+        .post-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #f0f1f3; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .post-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .flag { font-size: 18px; }
+        .post-country { font-size: 12px; color: #9ca3af; }
+        .post-time { font-size: 12px; color: #9ca3af; margin-left: auto; }
+        .post-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; line-height: 1.4; }
+        .post-content { font-size: 14px; color: #4b5563; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+        .empty { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; justify-content: space-around; padding: 10px 0 20px; z-index: 50; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .nav-icon { font-size: 22px; color: #9ca3af; }
+        .nav-label { font-size: 10px; color: #9ca3af; }
+        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
+        .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <div class="logo">🌍 全球声音</div>
+    <div class="user-badge" id="userBadge">加载中...</div>
+</div>
+
+<div class="country-tabs" id="countryTabs">
+    <button class="tab active" onclick="filterPosts('')">🌍 全部</button>
+    <button class="tab" onclick="filterPosts('CN')">🇨🇳 中国</button>
+    <button class="tab" onclick="filterPosts('US')">🇺🇸 美国</button>
+    <button class="tab" onclick="filterPosts('JP')">🇯🇵 日本</button>
+    <button class="tab" onclick="filterPosts('DE')">🇩🇪 德国</button>
+    <button class="tab" onclick="filterPosts('KR')">🇰🇷 韩国</button>
+    <button class="tab" onclick="filterPosts('IN')">🇮🇳 印度</button>
+</div>
+
+<div class="feed">
+    <div class="section-label">最新帖子</div>
+    <div id="postList"><div class="loading">加载中...</div></div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">发现</span>
+    </div>
+    <div class="nav-item">
+        <span class="nav-icon">🏳️</span>
+        <span class="nav-label">国家</span>
+    </div>
+    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
+    <div class="nav-item">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">消息</span>
+    </div>
+    <div class="nav-item" onclick="logout()">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">退出</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = {
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度'
+    };
+
+    const flagMap = {
+        'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵',
+        'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳'
+    };
+
+    let currentFilter = '';
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
+    }
+
+    async function loadPosts(countryFilter) {
+        const list = document.getElementById('postList');
+        list.innerHTML = '<div class="loading">加载中...</div>';
+
+        let query = client.from('posts').select('*').order('created_at', { ascending: false });
+        if (countryFilter) query = query.eq('country_code', countryFilter);
+
+        const { data, error } = await query;
+
+        if (error) {
+            list.innerHTML = '<div class="empty">加载失败，请刷新重试</div>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            list.innerHTML = '<div class="empty">还没有帖子，来发第一条吧 🌍</div>';
+            return;
+        }
+
+        list.innerHTML = data.map(post => `
+            <div class="post-card">
+                <div class="post-meta">
+                    <span class="flag">${flagMap[post.country_code] || '🌍'}</span>
+                    <span class="post-country">${countryMap[post.country_code] || post.country_code}</span>
+                    <span class="post-time">${timeAgo(post.created_at)}</span>
+                </div>
+                <div class="post-title">${post.title}</div>
+                <div class="post-content">${post.content}</div>
+            </div>
+        `).join('');
+    }
+
+    function filterPosts(country) {
+        currentFilter = country;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadPosts(country);
+    }
+
+    async function init() {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
+        }
+        const country = session.user.user_metadata?.country_code || 'CN';
+        document.getElementById('userBadge').innerText = '📍 ' + (countryMap[country] || country);
+        loadPosts('');
+    }
+
+    async function logout() {
+        await client.auth.signOut();
+        window.location.href = 'login.html';
+    }
+
+    init();
+</script>
+</body>
+</html>
