@@ -1,4 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帖子详情 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 120px; }
+
+        .top-nav { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
+        .back-btn { font-size: 22px; cursor: pointer; color: #6b7280; }
+        .nav-title { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+
+        .post-card { background: white; padding: 20px; margin: 16px; border-radius: 16px; border: 1px solid #f0f1f3; }
+        .post-author { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .author-avatar { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .author-info { display: flex; flex-direction: column; gap: 2px; }
+        .author-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+        .author-meta { display: flex; align-items: center; gap: 6px; }
+        .author-meta span { font-size: 12px; color: #9ca3af; }
+        .post-time { font-size: 12px; color: #9ca3af; }
+        .post-title { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; line-height: 1.4; }
+        .post-content { font-size: 15px; color: #4b5563; line-height: 1.6; }
+
+        .replies-header { padding: 0 16px; margin-bottom: 8px; }
+        .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 0; display: flex; align-items: center; gap: 6px; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+        .country-group { margin: 0 16px 12px; }
+        .country-group-header { display: flex; align-items: center; gap: 8px; padding: 10px 0 8px; border-bottom: 1px solid #f0f1f3; margin-bottom: 8px; }
+        .country-group-title { font-size: 13px; font-weight: 700; color: #374151; }
+        .reply-count { font-size: 11px; color: #9ca3af; }
+
+        .reply-card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 8px; border: 1px solid #f0f1f3; }
+        .reply-author { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .reply-avatar { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .reply-author-info { display: flex; flex-direction: column; gap: 1px; }
+        .reply-author-name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+        .reply-meta { display: flex; align-items: center; gap: 6px; }
+        .reply-meta span { font-size: 11px; color: #9ca3af; }
+        .reply-time { font-size: 11px; color: #9ca3af; margin-left: auto; }
+        .reply-content { font-size: 14px; color: #374151; line-height: 1.5; padding-left: 40px; }
+
+        .empty-replies { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
+        .loading { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
+
+        .reply-box { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; padding: 12px 16px 28px; }
+        .reply-input-row { display: flex; gap: 10px; align-items: flex-end; }
+        .reply-input { flex: 1; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; line-height: 1.4; }
+        .reply-input:focus { outline: none; border-color: #2563eb; }
+        .reply-btn { padding: 12px 18px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .reply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .cooldown-tip { font-size: 11px; color: #f59e0b; margin-top: 6px; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <span class="back-btn" onclick="window.location.href='index.html'">←</span>
+    <span class="nav-title">帖子详情</span>
 </div>
+
+<div id="postDetail"><div class="loading">加载中...</div></div>
+
+<div class="replies-header">
+    <div class="section-label">全球回复</div>
+</div>
+
+<div id="repliesList"><div class="loading">加载回复...</div></div>
+
+<div class="reply-box">
+    <div class="reply-input-row">
+        <textarea id="replyInput" class="reply-input" placeholder="发表你的跨国观点..." rows="1"></textarea>
+        <button class="reply-btn" id="replyBtn" onclick="submitReply()">回复</button>
+    </div>
+    <div class="cooldown-tip" id="cooldownTip">⏳ 请等待15秒冷静期后再发送</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = {
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度'
+    };
+    const flagMap = {
+        'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵',
+        'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳'
+    };
+
+    let postId = null;
+    let userCountry = null;
+    let currentUser = null;
+    let isOwnPost = false;
+    let cooldownActive = false;
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
+    }
+
+    async function loadPost() {
+        const { data, error } = await client.from('posts').select('*').eq('id', postId).single();
+        if (error || !data) {
+            document.getElementById('postDetail').innerHTML = '<div class="loading">帖子不存在</div>';
+            return;
+        }
+
+        // 使用帖子存储的作者信息，如果没有则回退到旧数据
+        const authorName = data.author_name || '匿名用户';
+        const authorAvatar = data.author_avatar || flagMap[data.country_code] || '🌍';
+
+        document.getElementById('postDetail').innerHTML = `
+            <div class="post-card">
+                <div class="post-author">
+                    <div class="author-avatar">${authorAvatar}</div>
+                    <div class="author-info">
+                        <div class="author-name">${authorName}</div>
+                        <div class="author-meta">
+                            <span>${flagMap[data.country_code] || '🌍'} ${countryMap[data.country_code] || data.country_code}</span>
+                            <span>·</span>
+                            <span class="post-time">${timeAgo(data.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-title">${data.title}</div>
+                <div class="post-content">${data.content}</div>
+            </div>
+        `;
+    }
+
+    async function loadReplies() {
+        const { data, error } = await client.from('replies').select('*').eq('post_id', postId).order('created_at', { ascending: true });
+        const list = document.getElementById('repliesList');
+
+        if (error) { list.innerHTML = '<div class="empty-replies">加载失败</div>'; return; }
+        if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">还没有回复，来发第一条跨国评论 🌍</div>'; return; }
+
+        // 按国家分组
+        const grouped = {};
+        data.forEach(r => {
+            if (!grouped[r.country_code]) grouped[r.country_code] = [];
+            grouped[r.country_code].push(r);
+        });
+
+        list.innerHTML = Object.entries(grouped).map(([country, replies]) => `
+            <div class="country-group">
+                <div class="country-group-header">
+                    <span style="font-size:18px">${flagMap[country] || '🌍'}</span>
+                    <span class="country-group-title">${countryMap[country] || country}</span>
+                    <span class="reply-count">${replies.length}条回复</span>
+                </div>
+                ${replies.map(r => {
+                    // 使用回复存储的作者信息，如果没有则回退
+                    const rName = r.author_name || '匿名用户';
+                    const rAvatar = r.author_avatar || flagMap[r.country_code] || '🌍';
+                    return `
+                    <div class="reply-card">
+                        <div class="reply-author">
+                            <div class="reply-avatar">${rAvatar}</div>
+                            <div class="reply-author-info">
+                                <div class="reply-author-name">${rName}</div>
+                                <div class="reply-meta">
+                                    <span>${flagMap[r.country_code] || '🌍'} ${countryMap[r.country_code] || r.country_code}</span>
+                                    <span>·</span>
+                                    <span class="reply-time">${timeAgo(r.created_at)}</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="reply-content">${r.content}</div>
                     </div>
@@ -100,4 +276,4 @@
     init();
 </script>
 </body>
-                </html>
+</html>
