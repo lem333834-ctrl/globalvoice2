@@ -12,9 +12,12 @@
         .nav-title { font-size: 17px; font-weight: 700; color: #1a1a2e; }
 
         .profile-header { background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 32px 20px 24px; text-align: center; }
-        .avatar { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.4); }
-        .profile-email { font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 8px; }
-        .country-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.4); }
+        .profile-username { font-size: 20px; font-weight: 700; color: white; margin-bottom: 4px; }
+        .profile-email { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 10px; }
+        .country-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .edit-profile-btn { margin-top: 12px; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.4); padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .edit-profile-btn:hover { background: rgba(255,255,255,0.25); }
 
         .stats-row { display: flex; background: white; border-bottom: 1px solid #f0f1f3; }
         .stat-item { flex: 1; padding: 16px; text-align: center; border-right: 1px solid #f0f1f3; }
@@ -43,6 +46,23 @@
         .nav-label { font-size: 10px; color: #9ca3af; }
         .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
         .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+
+        .edit-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+        .edit-modal.show { display: flex; }
+        .edit-modal-content { background: white; border-radius: 16px; width: 90%; max-width: 360px; max-height: 85vh; overflow-y: auto; }
+        .edit-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f1f3; }
+        .edit-modal-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+        .edit-modal-close { background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; padding: 0; }
+        .edit-modal-body { padding: 20px; }
+        .edit-modal-body label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
+        .edit-modal-body .form-input { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; margin-bottom: 20px; }
+        .edit-modal-body .form-input:focus { outline: none; border-color: #2563eb; }
+        .avatar-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 20px; }
+        .avatar-option { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: white; }
+        .avatar-option:hover { border-color: #93c5fd; }
+        .avatar-option.selected { border-color: #2563eb; background: #eff6ff; transform: scale(1.05); }
+        .save-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -53,8 +73,11 @@
 
 <div class="profile-header">
     <div class="avatar" id="avatarEmoji">🌍</div>
+    <div class="profile-username" id="profileUsername">加载中...</div>
     <div class="profile-email" id="profileEmail">加载中...</div>
     <div class="country-badge" id="countryBadge">加载中...</div>
+    <br>
+    <button class="edit-profile-btn" onclick="openEditModal()">编辑资料</button>
 </div>
 
 <div class="stats-row">
@@ -99,6 +122,22 @@
     </div>
 </div>
 
+<div class="edit-modal" id="editModal">
+    <div class="edit-modal-content">
+        <div class="edit-modal-header">
+            <span class="edit-modal-title">编辑资料</span>
+            <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+        </div>
+        <div class="edit-modal-body">
+            <label>用户名</label>
+            <input type="text" id="editUsername" class="form-input" placeholder="给自己起个名字" maxlength="20">
+            <label>选择头像</label>
+            <div class="avatar-picker" id="editAvatarPicker"></div>
+            <button class="save-btn" id="saveBtn" onclick="saveProfile()">保存</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const { createClient } = supabase;
@@ -109,6 +148,10 @@
 
     const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
+    const avatarList = ['🦊','🐼','🐨','🐱','🐶','🦁','🐯','🐸','🐧','🦉','🐙','🦄','🐲','🐳','🐬','🦓','🐝','🦜'];
+
+    let currentUser = null;
+    let editSelectedAvatar = '🦊';
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
@@ -118,23 +161,73 @@
         return Math.floor(diff/86400) + '天前';
     }
 
+    function openEditModal() {
+        const currentUsername = currentUser?.user_metadata?.username || '';
+        const currentAvatar = currentUser?.user_metadata?.avatar || '🌍';
+        document.getElementById('editUsername').value = currentUsername;
+        editSelectedAvatar = currentAvatar;
+        const picker = document.getElementById('editAvatarPicker');
+        picker.innerHTML = avatarList.map(a =>
+            `<div class="avatar-option ${a === currentAvatar ? 'selected' : ''}" data-avatar="${a}" onclick="selectEditAvatar(this)">${a}</div>`
+        ).join('');
+        document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('show');
+    }
+
+    function selectEditAvatar(el) {
+        document.querySelectorAll('#editAvatarPicker .avatar-option').forEach(a => a.classList.remove('selected'));
+        el.classList.add('selected');
+        editSelectedAvatar = el.dataset.avatar;
+    }
+
+    async function saveProfile() {
+        const newUsername = document.getElementById('editUsername').value.trim();
+        if (!newUsername) { alert('请输入用户名'); return; }
+
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerText = '保存中...';
+
+        const { data, error } = await client.auth.updateUser({
+            data: { username: newUsername, avatar: editSelectedAvatar }
+        });
+
+        if (error) {
+            alert('保存失败: ' + error.message);
+            btn.disabled = false;
+            btn.innerText = '保存';
+            return;
+        }
+
+        document.getElementById('avatarEmoji').innerText = editSelectedAvatar;
+        document.getElementById('profileUsername').innerText = newUsername;
+        currentUser = data.user;
+        btn.disabled = false;
+        btn.innerText = '保存';
+        closeEditModal();
+    }
+
     async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
 
         const user = session.user;
+        currentUser = user;
         const country = user.user_metadata?.country_code || 'CN';
+        const username = user.user_metadata?.username || '未设置用户名';
+        const avatar = user.user_metadata?.avatar || '🌍';
 
-        // 填充头部信息
-        document.getElementById('avatarEmoji').innerText = flagMap[country] || '🌍';
+        document.getElementById('avatarEmoji').innerText = avatar;
+        document.getElementById('profileUsername').innerText = username;
         document.getElementById('profileEmail').innerText = user.email;
         document.getElementById('countryBadge').innerText = '📍 ' + (countryMap[country] || country);
 
-        // 加入天数
         const joinDays = Math.floor((new Date() - new Date(user.created_at)) / 86400000);
         document.getElementById('joinDays').innerText = joinDays || 1;
 
-        // 加载我的帖子
         const { data: posts, error } = await client
             .from('posts')
             .select('*')
@@ -159,7 +252,6 @@
             `).join('');
         }
 
-        // 加载我的回复数
         const { count } = await client
             .from('replies')
             .select('*', { count: 'exact', head: true })
