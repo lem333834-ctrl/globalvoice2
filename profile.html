@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人页 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
+
+        .top-nav { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
+        .nav-title { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+
+        .profile-header { background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 32px 20px 24px; text-align: center; }
+        .avatar { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.4); }
+        .profile-email { font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 8px; }
+        .country-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+
+        .stats-row { display: flex; background: white; border-bottom: 1px solid #f0f1f3; }
+        .stat-item { flex: 1; padding: 16px; text-align: center; border-right: 1px solid #f0f1f3; }
+        .stat-item:last-child { border-right: none; }
+        .stat-num { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+        .stat-label { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+        .section { padding: 16px; }
+        .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 0; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+        .post-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #f0f1f3; cursor: pointer; }
+        .post-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .post-time { font-size: 12px; color: #9ca3af; margin-left: auto; }
+        .post-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.4; }
+        .post-content { font-size: 13px; color: #6b7280; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .logout-btn { margin: 0 16px 16px; width: calc(100% - 32px); padding: 14px; background: white; color: #ef4444; border: 1.5px solid #ef4444; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+        .empty { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; justify-content: space-around; padding: 10px 0 20px; z-index: 50; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .nav-icon { font-size: 22px; color: #9ca3af; }
+        .nav-label { font-size: 10px; color: #9ca3af; }
+        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
+        .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <span class="nav-title">我的主页</span>
+</div>
+
+<div class="profile-header">
+    <div class="avatar" id="avatarEmoji">🌍</div>
+    <div class="profile-email" id="profileEmail">加载中...</div>
+    <div class="country-badge" id="countryBadge">加载中...</div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-item">
+        <div class="stat-num" id="postCount">-</div>
+        <div class="stat-label">发帖数</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num" id="replyCount">-</div>
+        <div class="stat-label">回复数</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num" id="joinDays">-</div>
+        <div class="stat-label">加入天数</div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-label">我发布的帖子</div>
+    <div id="myPosts"><div class="loading">加载中...</div></div>
+</div>
+
+<button class="logout-btn" onclick="logout()">退出登录</button>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">发现</span>
+    </div>
+    <div class="nav-item">
+        <span class="nav-icon">🏳️</span>
+        <span class="nav-label">国家</span>
+    </div>
+    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
+    <div class="nav-item">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">消息</span>
+    </div>
+    <div class="nav-item active">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
+    }
+
+    async function init() {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+
+        const user = session.user;
+        const country = user.user_metadata?.country_code || 'CN';
+
+        // 填充头部信息
+        document.getElementById('avatarEmoji').innerText = flagMap[country] || '🌍';
+        document.getElementById('profileEmail').innerText = user.email;
+        document.getElementById('countryBadge').innerText = '📍 ' + (countryMap[country] || country);
+
+        // 加入天数
+        const joinDays = Math.floor((new Date() - new Date(user.created_at)) / 86400000);
+        document.getElementById('joinDays').innerText = joinDays || 1;
+
+        // 加载我的帖子
+        const { data: posts, error } = await client
+            .from('posts')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        document.getElementById('postCount').innerText = posts?.length || 0;
+
+        if (error || !posts || posts.length === 0) {
+            document.getElementById('myPosts').innerHTML = '<div class="empty">还没有发过帖子</div>';
+        } else {
+            document.getElementById('myPosts').innerHTML = posts.map(post => `
+                <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
+                    <div class="post-meta">
+                        <span style="font-size:16px">${flagMap[post.country_code] || '🌍'}</span>
+                        <span style="font-size:12px;color:#9ca3af">${countryMap[post.country_code] || post.country_code}</span>
+                        <span class="post-time">${timeAgo(post.created_at)}</span>
+                    </div>
+                    <div class="post-title">${post.title}</div>
+                    <div class="post-content">${post.content}</div>
+                </div>
+            `).join('');
+        }
+
+        // 加载我的回复数
+        const { count } = await client
+            .from('replies')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+
+        document.getElementById('replyCount').innerText = count || 0;
+    }
+
+    async function logout() {
+        await client.auth.signOut();
+        window.location.href = 'login.html';
+    }
+
+    init();
+</script>
+</body>
+</html>
