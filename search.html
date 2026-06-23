@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
+
+        .top-nav {
+            background: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f0f1f3;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .back-btn {
+            font-size: 20px;
+            color: #1a1a2e;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: #f3f4f6;
+            border-radius: 20px;
+            padding: 8px 14px;
+            gap: 8px;
+        }
+        .search-box svg {
+            width: 18px;
+            height: 18px;
+            color: #9ca3af;
+            flex-shrink: 0;
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+        .search-box input::placeholder { color: #b0b0b0; }
+
+        .feed { padding: 16px; }
+        .results-info {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            letter-spacing: 1px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .results-info::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #f0f1f3;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+        .post-card:active { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .post-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+        .flag { font-size: 18px; }
+        .post-country { font-size: 12px; color: #9ca3af; }
+        .post-time { font-size: 12px; color: #9ca3af; margin-left: auto; }
+        .post-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; line-height: 1.4; }
+        .post-title mark { background: #dbeafe; color: #2563eb; border-radius: 3px; padding: 0 2px; }
+        .post-content { font-size: 14px; color: #4b5563; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state .text { font-size: 14px; }
+
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #f0f1f3;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px;
+            z-index: 50;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+        .nav-icon { font-size: 22px; color: #9ca3af; }
+        .nav-label { font-size: 10px; color: #9ca3af; }
+        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
+        .post-btn {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            margin-top: -8px;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+    <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="搜索帖子标题…" autocomplete="off" autofocus>
+    </div>
+</div>
+
+<div class="feed">
+    <div id="resultsInfo" class="results-info">输入关键词开始搜索</div>
+    <div id="postList">
+        <div class="empty-state">
+            <div class="icon">🔍</div>
+            <div class="text">输入关键词，搜索你感兴趣的帖子</div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">发现</span>
+    </div>
+    <div class="nav-item">
+        <span class="nav-icon">🏳️</span>
+        <span class="nav-label">国家</span>
+    </div>
+    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
+    <div class="nav-item">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">消息</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
+
+    const searchInput = document.getElementById('searchInput');
+    const postList = document.getElementById('postList');
+    const resultsInfo = document.getElementById('resultsInfo');
+
+    let searchTimer = null;
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function highlightKeyword(title, keyword) {
+        const safeTitle = escapeHtml(title);
+        if (!keyword) return safeTitle;
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+        return safeTitle.replace(regex, '<mark>$1</mark>');
+    }
+
+    async function searchPosts(keyword) {
+        if (!keyword) {
+            resultsInfo.textContent = '输入关键词开始搜索';
+            postList.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">🔍</div>
+                    <div class="text">输入关键词，搜索你感兴趣的帖子</div>
+                </div>
+            `;
+            return;
+        }
+
+        resultsInfo.textContent = '搜索中…';
+        postList.innerHTML = '<div class="loading">加载中...</div>';
+
+        // 用 ilike 做不区分大小写的模糊匹配
+        const { data, error } = await client
+            .from('posts')
+            .select('*')
+            .ilike('title', `%${keyword}%`)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            resultsInfo.textContent = '搜索失败';
+            postList.innerHTML = `<div class="empty-state"><div class="text">搜索出错：${error.message}</div></div>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            resultsInfo.textContent = `没有找到「${keyword}」相关的帖子`;
+            postList.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">😅</div>
+                    <div class="text">没有找到标题包含「${keyword}」的帖子</div>
+                </div>
+            `;
+            return;
+        }
+
+        resultsInfo.textContent = `找到 ${data.length} 篇相关帖子`;
+        postList.innerHTML = data.map(post => `
+            <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
+                <div class="post-meta">
+                    <span class="flag">${flagMap[post.country_code] || '🌍'}</span>
+                    <span class="post-country">${countryMap[post.country_code] || post.country_code || ''}</span>
+                    <span class="post-time">${timeAgo(post.created_at)}</span>
+                </div>
+                <div class="post-title">${highlightKeyword(post.title, keyword)}</div>
+                <div class="post-content">${escapeHtml(post.content)}</div>
+            </div>
+        `).join('');
+    }
+
+    // 输入时防抖搜索（300ms 延迟，避免频繁请求）
+    searchInput.addEventListener('input', function() {
+        const keyword = this.value.trim();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => searchPosts(keyword), 300);
+    });
+
+    // 回车立即搜索
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(searchTimer);
+            searchPosts(this.value.trim());
+        }
+    });
+</script>
+
+</body>
+</html>
