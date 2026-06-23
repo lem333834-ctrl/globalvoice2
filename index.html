@@ -130,8 +130,10 @@
     async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
-        const country = session.user.user_metadata?.country_code || 'CN';
-        document.getElementById('userBadge').innerText = '📍 ' + (countryMap[country] || country);
+        const user = session.user;
+        const username = user.user_metadata?.username || '未设置';
+        const avatar = user.user_metadata?.avatar || '🌍';
+        document.getElementById('userBadge').innerText = avatar + ' ' + username;
         loadPosts('');
     }
 
