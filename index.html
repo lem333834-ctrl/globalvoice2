@@ -40,7 +40,7 @@
     <div class="logo">🌍 全球声音</div>
     <div class="user-badge" id="userBadge">加载中...</div>
 </div>
-<div class="country-tabs" id="countryTabs">
+<div class="country-tabs">
     <button class="tab active" onclick="filterPosts(this, '')">🌍 全部</button>
     <button class="tab" onclick="filterPosts(this, 'CN')">🇨🇳 中国</button>
     <button class="tab" onclick="filterPosts(this, 'US')">🇺🇸 美国</button>
@@ -54,7 +54,7 @@
     <div id="postList"><div class="loading">加载中...</div></div>
 </div>
 <div class="bottom-nav">
-    <div class="nav-item active">
+    <div class="nav-item active" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
         <span class="nav-label">发现</span>
     </div>
@@ -67,9 +67,9 @@
         <span class="nav-icon">💬</span>
         <span class="nav-label">消息</span>
     </div>
-    <div class="nav-item" onclick="logout()">
+    <div class="nav-item" onclick="window.location.href='profile.html'">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">退出</span>
+        <span class="nav-label">我的</span>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -123,11 +123,6 @@
         const country = session.user.user_metadata?.country_code || 'CN';
         document.getElementById('userBadge').innerText = '📍 ' + (countryMap[country] || country);
         loadPosts('');
-    }
-
-    async function logout() {
-        await client.auth.signOut();
-        window.location.href = 'login.html';
     }
 
     init();
