@@ -1,3 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发帖 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
+        .back-btn { font-size: 24px; cursor: pointer; color: #6b7280; }
+        .header h2 { font-size: 18px; font-weight: 700; color: #1a1a2e; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .country-badge { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
+        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; transition: border-color 0.2s; background: #fafafa; }
+        .form-input:focus { outline: none; border-color: #2563eb; background: white; }
+        textarea.form-input { min-height: 140px; resize: vertical; line-height: 1.6; }
+        .char-count { text-align: right; font-size: 11px; color: #9ca3af; margin-top: 4px; }
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-msg { color: #ef4444; font-size: 13px; margin-top: 12px; text-align: center; }
+        .success-msg { color: #16a34a; font-size: 13px; margin-top: 12px; text-align: center; }
+        .tip { background: #f8f9fb; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
+        .tip strong { color: #374151; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="back-btn" onclick="window.location.href='index.html'">←</span>
+        <h2>发布帖子</h2>
+    </div>
+
+    <div class="card">
+        <div class="country-badge" id="countryBadge">🌍 加载中...</div>
+
+        <div class="tip">
+            <strong>发帖规则：</strong>你只能在自己的归属国板块发帖，但全球用户都可以回复你的帖子。
+        </div>
+
+        <div class="form-group">
+            <label>帖子标题</label>
+            <input type="text" id="title" class="form-input" placeholder="用一句话概括你想聊的话题" maxlength="100">
+            <div class="char-count"><span id="titleCount">0</span>/100</div>
+        </div>
+
+        <div class="form-group">
+            <label>帖子内容</label>
+            <textarea id="content" class="form-input" placeholder="分享你的真实想法、经历或问题..."></textarea>
+            <div class="char-count"><span id="contentCount">0</span> 字</div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <button class="submit-btn" id="submitBtn" onclick="handlePost()">发布到全球</button>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = {
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度'
+    };
+
+    let userCountry = null;
+    let currentUser = null;
+
+    // 页面加载时检查登录状态
+    async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) {
             window.location.href = 'login.html';
