@@ -18,6 +18,10 @@
         .form-row { display: flex; gap: 10px; }
         .form-row .form-input { flex: 1; }
         .country-select { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%23374151" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; padding-right: 40px; }
+        .avatar-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 4px; }
+        .avatar-option { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: white; }
+        .avatar-option:hover { border-color: #93c5fd; }
+        .avatar-option.selected { border-color: #2563eb; background: #eff6ff; transform: scale(1.05); }
         .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
         .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
@@ -30,9 +34,36 @@
 <div class="register-card">
     <div class="logo">
         <h1>🌍 全球声音</h1>
-        <p>同一个世界，不同的声音</p>
+        <p>同一个世界，不同的声音</p >
     </div>
     <div id="registerForm">
+        <div class="form-group">
+            <label>用户名</label>
+            <input type="text" id="username" class="form-input" placeholder="给自己起个名字" maxlength="20">
+        </div>
+        <div class="form-group">
+            <label>选择头像</label>
+            <div class="avatar-picker" id="avatarPicker">
+                <div class="avatar-option selected" data-avatar="🦊" onclick="selectAvatar(this)">🦊</div>
+                <div class="avatar-option" data-avatar="🐼" onclick="selectAvatar(this)">🐼</div>
+                <div class="avatar-option" data-avatar="🐨" onclick="selectAvatar(this)">🐨</div>
+                <div class="avatar-option" data-avatar="🐱" onclick="selectAvatar(this)">🐱</div>
+                <div class="avatar-option" data-avatar="🐶" onclick="selectAvatar(this)">🐶</div>
+                <div class="avatar-option" data-avatar="🦁" onclick="selectAvatar(this)">🦁</div>
+                <div class="avatar-option" data-avatar="🐯" onclick="selectAvatar(this)">🐯</div>
+                <div class="avatar-option" data-avatar="🐸" onclick="selectAvatar(this)">🐸</div>
+                <div class="avatar-option" data-avatar="🐧" onclick="selectAvatar(this)">🐧</div>
+                <div class="avatar-option" data-avatar="🦉" onclick="selectAvatar(this)">🦉</div>
+                <div class="avatar-option" data-avatar="🐙" onclick="selectAvatar(this)">🐙</div>
+                <div class="avatar-option" data-avatar="🦄" onclick="selectAvatar(this)">🦄</div>
+                <div class="avatar-option" data-avatar="🐲" onclick="selectAvatar(this)">🐲</div>
+                <div class="avatar-option" data-avatar="🐳" onclick="selectAvatar(this)">🐳</div>
+                <div class="avatar-option" data-avatar="🐬" onclick="selectAvatar(this)">🐬</div>
+                <div class="avatar-option" data-avatar="🦓" onclick="selectAvatar(this)">🦓</div>
+                <div class="avatar-option" data-avatar="🐝" onclick="selectAvatar(this)">🐝</div>
+                <div class="avatar-option" data-avatar="🦜" onclick="selectAvatar(this)">🦜</div>
+            </div>
+        </div>
         <div class="form-group">
             <label>邮箱地址</label>
             <input type="email" id="email" class="form-input" placeholder="you@example.com">
@@ -72,7 +103,7 @@
         <div class="success-msg" id="successMsg"></div>
         <button class="submit-btn" id="submitBtn" onclick="handleRegister()">注册并开启全球视野</button>
     </div>
-    <div class="login-link">已有账号？<a href="login.html">立即登录</a></div>
+    <div class="login-link">已有账号？<a href=" ">立即登录</a ></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -83,6 +114,14 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
 
+    let selectedAvatar = '🦊';
+
+    function selectAvatar(el) {
+        document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedAvatar = el.dataset.avatar;
+    }
+
     async function handleRegister() {
         const btn = document.getElementById('submitBtn');
         const errBox = document.getElementById('errorMsg');
@@ -90,13 +129,14 @@
         errBox.innerText = '';
         sucBox.innerText = '';
 
+        const username = document.getElementById('username').value.trim();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const phonePrefix = document.getElementById('phonePrefix').value;
         const phone = document.getElementById('phone').value;
         const countryCode = document.getElementById('countryCode').value;
 
-        if (!email || !password || !phone || !countryCode) {
+        if (!username || !email || !password || !phone || !countryCode) {
             errBox.innerText = '请填写所有必填项';
             return;
         }
@@ -114,6 +154,8 @@
                 password: password,
                 options: {
                     data: {
+                        username: username,
+                        avatar: selectedAvatar,
                         country_code: countryCode,
                         full_phone: phonePrefix + phone
                     }
