@@ -33,6 +33,10 @@
         .author-name { font-size: 13px; font-weight: 600; color: #374151; }
         .post-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; line-height: 1.4; }
         .post-content { font-size: 14px; color: #4b5563; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .post-footer { display: flex; align-items: center; gap: 16px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f5f5f5; }
+        .post-likes { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #9ca3af; }
+        .post-likes .like-icon { font-size: 14px; }
+        .post-likes.hot { color: #ef4444; font-weight: 600; }
         .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
         .empty { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; justify-content: space-around; padding: 10px 0 20px; z-index: 50; }
@@ -64,7 +68,7 @@
     <button class="tab" onclick="filterPosts(this, 'IN')">🇮🇳 印度</button>
 </div>
 <div class="feed">
-    <div class="section-label">最新帖子</div>
+    <div class="section-label">🔥 热门帖子</div>
     <div id="postList"><div class="loading">加载中...</div></div>
 </div>
 <div class="bottom-nav">
@@ -96,6 +100,28 @@
     const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
 
+    // ========================
+    // 帖子排序核心逻辑
+    // 分数 = (点赞数 + 1) × 时效系数
+    // ≤3天=1.0, 3-7天=0.06, >7天=0.03
+    // ========================
+    function getTimeFactor(dateStr) {
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const days = diff / 86400000;
+        if (days <= 3) return 1.0;
+        if (days <= 7) return 0.06;
+        return 0.03;
+    }
+
+    function calculatePostScore(post) {
+        const likes = post.likes || 0;
+        return (likes + 1) * getTimeFactor(post.created_at);
+    }
+
+    function sortPostsByScore(posts) {
+        return [...posts].sort((a, b) => calculatePostScore(b) - calculatePostScore(a));
+    }
+
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
         if (diff < 60) return '刚刚';
@@ -120,7 +146,14 @@
         const { data, error } = await query;
         if (error) { list.innerHTML = '<div class="empty">加载失败，请刷新重试</div>'; return; }
         if (!data || data.length === 0) { list.innerHTML = '<div class="empty">还没有帖子，来发第一条吧 🌍</div>'; return; }
-        list.innerHTML = data.map(post => `
+
+        // 按权重排序
+        const sorted = sortPostsByScore(data);
+
+        list.innerHTML = sorted.map(post => {
+            const likes = post.likes || 0;
+            const likeClass = likes >= 10 ? 'post-likes hot' : 'post-likes';
+            return `
             <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
                 <div class="post-meta">
                     <span class="flag">${flagMap[post.country_code] || '🌍'}</span>
@@ -133,8 +166,14 @@
                 </div>
                 <div class="post-title">${post.title}</div>
                 <div class="post-content">${post.content}</div>
+                <div class="post-footer">
+                    <div class="${likeClass}">
+                        <span class="like-icon">👍</span>
+                        <span>${likes}</span>
+                    </div>
+                </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     function filterPosts(btn, country) {
