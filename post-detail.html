@@ -113,6 +113,8 @@
     let isOwnPost = false;
     let cooldownActive = false;
     let userVotes = {}; // { replyId: 'like' | 'dislike' }
+    let replyData = {}; // { replyId: reply对象 } 缓存当前渲染的回复数据
+    const votingLocks = {}; // { replyId: true } 防止并发点击
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
@@ -163,7 +165,6 @@
                 data.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
             }
         } catch (e) {
-            // reply_votes 表可能还没建，静默忽略
             console.warn('加载投票记录失败，可能需要建 reply_votes 表');
         }
     }
@@ -174,6 +175,10 @@
 
         if (error) { list.innerHTML = '<div class="empty-replies">加载失败</div>'; return; }
         if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">还没有回复，来发第一条跨国评论 🌍</div>'; return; }
+
+        // 缓存回复数据
+        replyData = {};
+        data.forEach(r => { replyData[r.id] = r; });
 
         // 加载当前用户的投票记录
         userVotes = {};
@@ -218,7 +223,7 @@
         const hotBadge = isHot ? '<span class="hot-badge">热门</span>' : '';
 
         return `
-            <div class="reply-card">
+            <div class="reply-card" id="reply-${r.id}">
                 <div class="reply-author">
                     <div class="reply-avatar">${rAvatar}</div>
                     <div class="reply-author-info">
@@ -233,46 +238,113 @@
                 </div>
                 <div class="reply-content">${r.content}</div>
                 <div class="reply-actions">
-                    <div class="vote-btn ${likeClass}" onclick="toggleVote('${r.id}', 'like')">👍 <span>${likeCount}</span></div>
-                    <div class="vote-btn ${dislikeClass}" onclick="toggleVote('${r.id}', 'dislike')">👎 <span>${dislikeCount}</span></div>
+                    <div class="vote-btn ${likeClass}" id="like-btn-${r.id}" onclick="toggleVote('${r.id}', 'like')">👍 <span id="like-count-${r.id}">${likeCount}</span></div>
+                    <div class="vote-btn ${dislikeClass}" id="dislike-btn-${r.id}" onclick="toggleVote('${r.id}', 'dislike')">👎 <span id="dislike-count-${r.id}">${dislikeCount}</span></div>
                 </div>
             </div>
         `;
     }
 
-    // 点赞/点灭切换
+    // 乐观更新：先改 UI，再写库，失败回滚
     async function toggleVote(replyId, type) {
         if (!currentUser) return;
+        if (votingLocks[replyId]) return; // 防止快速连点
+        votingLocks[replyId] = true;
 
         const existing = userVotes[replyId];
+        const r = replyData[replyId];
+        if (!r) { votingLocks[replyId] = false; return; }
 
+        // 保存旧状态用于回滚
+        const oldLikes = r.likes || 0;
+        const oldDislikes = r.dislikes || 0;
+        const oldVote = existing;
+
+        // 计算新状态
+        let newLikes = oldLikes;
+        let newDislikes = oldDislikes;
+        let newVote = oldVote;
+
+        if (existing === type) {
+            // 取消投票
+            newVote = null;
+            if (type === 'like') newLikes = Math.max(0, oldLikes - 1);
+            else newDislikes = Math.max(0, oldDislikes - 1);
+        } else {
+            // 新投票或切换方向
+            if (existing === 'like') newLikes = Math.max(0, oldLikes - 1);
+            if (existing === 'dislike') newDislikes = Math.max(0, oldDislikes - 1);
+            if (type === 'like') newLikes += 1;
+            else newDislikes += 1;
+            newVote = type;
+        }
+
+        // 立即更新 UI（乐观更新）
+        updateVoteUI(replyId, newLikes, newDislikes, newVote);
+
+        // 更新本地缓存和状态
+        r.likes = newLikes;
+        r.dislikes = newDislikes;
+        if (newVote) {
+            userVotes[replyId] = newVote;
+        } else {
+            delete userVotes[replyId];
+        }
+
+        // 后台写库
         try {
-            if (existing === type) {
+            if (oldVote === type) {
                 // 取消投票
                 await client.from('reply_votes')
                     .delete()
                     .eq('reply_id', replyId)
                     .eq('user_id', currentUser.id);
                 await adjustCount(replyId, type, -1);
-                delete userVotes[replyId];
             } else {
-                if (existing) {
-                    // 切换投票方向：先删旧票再减旧计数
+                if (oldVote) {
+                    // 切换方向：先删旧票
                     await client.from('reply_votes')
                         .delete()
                         .eq('reply_id', replyId)
                         .eq('user_id', currentUser.id);
-                    await adjustCount(replyId, existing, -1);
+                    await adjustCount(replyId, oldVote, -1);
                 }
-                // 写新票 + 加新计数
+                // 写新票
                 await client.from('reply_votes')
                     .insert({ reply_id: replyId, user_id: currentUser.id, vote_type: type });
                 await adjustCount(replyId, type, 1);
-                userVotes[replyId] = type;
             }
-            loadReplies();
         } catch (err) {
+            // 写库失败，回滚 UI 和状态
+            r.likes = oldLikes;
+            r.dislikes = oldDislikes;
+            if (oldVote) {
+                userVotes[replyId] = oldVote;
+            } else {
+                delete userVotes[replyId];
+            }
+            updateVoteUI(replyId, oldLikes, oldDislikes, oldVote);
             alert('操作失败: ' + err.message);
+        } finally {
+            votingLocks[replyId] = false;
+        }
+    }
+
+    // 直接更新 DOM 中的投票数字和按钮样式
+    function updateVoteUI(replyId, likeCount, dislikeCount, myVote) {
+        const likeCountEl = document.getElementById(`like-count-${replyId}`);
+        const dislikeCountEl = document.getElementById(`dislike-count-${replyId}`);
+        const likeBtn = document.getElementById(`like-btn-${replyId}`);
+        const dislikeBtn = document.getElementById(`dislike-btn-${replyId}`);
+
+        if (likeCountEl) likeCountEl.textContent = likeCount;
+        if (dislikeCountEl) dislikeCountEl.textContent = dislikeCount;
+
+        if (likeBtn) {
+            likeBtn.classList.toggle('like-active', myVote === 'like');
+        }
+        if (dislikeBtn) {
+            dislikeBtn.classList.toggle('dislike-active', myVote === 'dislike');
         }
     }
 
