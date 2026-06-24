@@ -27,13 +27,16 @@
         .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 0; display: flex; align-items: center; gap: 6px; }
         .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
 
-        /* 排序分区标题 */
-        .sort-divider { padding: 12px 16px 6px; display: flex; align-items: center; gap: 6px; }
+        .sort-divider { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; }
         .sort-divider .sort-icon { font-size: 14px; }
         .sort-divider .sort-text { font-size: 13px; font-weight: 700; color: #374151; }
-        .sort-divider .sort-line { flex: 1; height: 1px; background: #e5e7eb; margin-left: 4px; }
+        .sort-divider .sort-line { flex: 1; height: 1px; background: #e5e7eb; }
 
-        .reply-card { background: white; border-radius: 12px; padding: 14px; margin: 0 16px 8px; border: 1px solid #f0f1f3; }
+        .reply-card { background: white; border-radius: 12px; padding: 14px; margin: 0 16px 8px; border: 1px solid #f0f1f3; transition: opacity 0.15s; }
+        .reply-card-child { margin-left: 44px; border-left: 3px solid #e5e7eb; }
+        .reply-card-context { opacity: 0.6; background: #f9fafb; border-style: dashed; }
+        .reply-card-context .reply-content { font-size: 13px; color: #6b7280; }
+
         .reply-author { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .reply-avatar { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
         .reply-author-info { display: flex; flex-direction: column; gap: 1px; }
@@ -43,24 +46,33 @@
         .reply-time { font-size: 11px; color: #9ca3af; margin-left: auto; }
         .reply-content { font-size: 14px; color: #374151; line-height: 1.5; padding-left: 40px; }
 
-        /* 点赞/点灭按钮 */
-        .reply-actions { display: flex; align-items: center; gap: 8px; padding-left: 40px; margin-top: 10px; }
-        .vote-btn { display: flex; align-items: center; gap: 4px; padding: 4px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; font-size: 13px; color: #6b7280; cursor: pointer; transition: all 0.15s; user-select: none; }
-        .vote-btn:hover { border-color: #d1d5db; background: #f3f4f6; }
-        .vote-btn:active { transform: scale(0.96); }
-        .vote-btn.like-active { background: #eff6ff; border-color: #93c5fd; color: #2563eb; font-weight: 600; }
-        .vote-btn.dislike-active { background: #fef2f2; border-color: #fca5a5; color: #dc2626; font-weight: 600; }
-        .vote-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .hot-badge { font-size: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 2px 7px; border-radius: 6px; margin-left: auto; }
 
-        /* 热门徽章 */
-        .hot-badge { font-size: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 2px 8px; border-radius: 6px; margin-left: auto; }
+        .reply-actions { display: flex; align-items: center; gap: 4px; padding-left: 40px; margin-top: 8px; }
+        .vote-btn { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 8px; font-size: 13px; color: #6b7280; cursor: pointer; user-select: none; transition: all 0.12s; }
+        .vote-btn:hover { background: #f3f4f6; }
+        .vote-btn.like-active { color: #2563eb; background: #eff6ff; }
+        .vote-btn.dislike-active { color: #ef4444; background: #fef2f2; }
+        .vote-btn:active { transform: scale(0.92); }
+        .vote-btn .vote-count { font-weight: 600; font-size: 12px; }
+
+        .reply-action-btn { font-size: 12px; color: #9ca3af; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: all 0.12s; }
+        .reply-action-btn:hover { background: #f3f4f6; color: #2563eb; }
+
+        .inline-reply-input { margin: 8px 0 0 40px; padding: 10px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; }
+        .inline-reply-textarea { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; resize: none; min-height: 38px; max-height: 80px; line-height: 1.4; font-family: inherit; }
+        .inline-reply-textarea:focus { outline: none; border-color: #2563eb; }
+        .inline-reply-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+        .inline-reply-cancel { padding: 5px 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 12px; color: #6b7280; cursor: pointer; }
+        .inline-reply-submit { padding: 5px 14px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .inline-reply-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .empty-replies { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
         .loading { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
 
         .reply-box { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; padding: 12px 16px 28px; }
         .reply-input-row { display: flex; gap: 10px; align-items: flex-end; }
-        .reply-input { flex: 1; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; line-height: 1.4; }
+        .reply-input { flex: 1; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; line-height: 1.4; font-family: inherit; }
         .reply-input:focus { outline: none; border-color: #2563eb; }
         .reply-btn { padding: 12px 18px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .reply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -112,9 +124,14 @@
     let currentUser = null;
     let isOwnPost = false;
     let cooldownActive = false;
-    let userVotes = {}; // { replyId: 'like' | 'dislike' }
-    let replyData = {}; // { replyId: reply对象 } 缓存当前渲染的回复数据
-    const votingLocks = {}; // { replyId: true } 防止并发点击
+
+    // 缓存数据
+    let replyData = {};        // 所有回复，按 id 索引
+    let topLevelReplies = [];   // 顶级评论
+    let childrenMap = {};       // parentId -> [子回复]
+    let userVotes = {};         // replyId -> 'like' | 'dislike'
+    let votingLocks = {};       // 防并发
+    let activeReplyInput = null; // 当前打开的内联回复输入框
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
@@ -153,65 +170,133 @@
         `;
     }
 
-    // 加载当前用户对所有回复的投票记录
     async function loadUserVotes(replyIds) {
-        if (!replyIds.length) return;
-        try {
-            const { data } = await client.from('reply_votes')
-                .select('reply_id, vote_type')
-                .eq('user_id', currentUser.id)
-                .in('reply_id', replyIds);
-            if (data) {
-                data.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
-            }
-        } catch (e) {
-            console.warn('加载投票记录失败，可能需要建 reply_votes 表');
+        if (!currentUser || replyIds.length === 0) return;
+        const { data } = await client.from('reply_votes')
+            .select('reply_id, vote_type')
+            .eq('user_id', currentUser.id)
+            .in('reply_id', replyIds);
+        if (data) {
+            data.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
         }
     }
 
     async function loadReplies() {
-        const { data, error } = await client.from('replies').select('*').eq('post_id', postId).order('created_at', { ascending: true });
+        activeReplyInput = null;
+        const { data, error } = await client.from('replies')
+            .select('*').eq('post_id', postId).order('created_at', { ascending: true });
         const list = document.getElementById('repliesList');
 
         if (error) { list.innerHTML = '<div class="empty-replies">加载失败</div>'; return; }
         if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">还没有回复，来发第一条跨国评论 🌍</div>'; return; }
 
-        // 缓存回复数据
+        // 缓存所有回复
         replyData = {};
         data.forEach(r => { replyData[r.id] = r; });
 
-        // 加载当前用户的投票记录
+        // 分离顶级评论和子回复
+        topLevelReplies = data.filter(r => !r.parent_id || !replyData[r.parent_id]);
+        childrenMap = {};
+        data.filter(r => r.parent_id && replyData[r.parent_id]).forEach(r => {
+            if (!childrenMap[r.parent_id]) childrenMap[r.parent_id] = [];
+            childrenMap[r.parent_id].push(r);
+        });
+
+        // 加载用户投票记录
         userVotes = {};
         await loadUserVotes(data.map(r => r.id));
 
-        // 排序：点赞最多的5条置顶（同赞数按时间新优先），其余按时间从新到旧
-        const sorted = [...data].sort((a, b) => {
+        // 所有回复按点赞排序，取前5为热门
+        const allRanked = [...data].sort((a, b) => {
             const likeDiff = (b.likes || 0) - (a.likes || 0);
             if (likeDiff !== 0) return likeDiff;
             return new Date(b.created_at) - new Date(a.created_at);
         });
+        const top5 = allRanked.slice(0, 5);
+        const top5Ids = new Set(top5.map(r => r.id));
 
-        const top5 = sorted.slice(0, 5);
-        const rest = sorted.slice(5).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        // 找出热门区需要显示的根父评论
+        // （自己在 top5，或其子回复在 top5）
+        const hotParentIds = new Set();
+        top5.forEach(r => {
+            const rootId = r.parent_id || r.id;
+            hotParentIds.add(rootId);
+        });
+
+        // 按「组内最高点赞」排序热门父评论
+        const hotParentsArray = [...hotParentIds].map(parentId => {
+            const parent = replyData[parentId];
+            const children = childrenMap[parentId] || [];
+            const allInGroup = [parent, ...children];
+            const maxLikes = Math.max(...allInGroup.map(r => r.likes || 0));
+            return { parent, children, maxLikes };
+        }).sort((a, b) => b.maxLikes - a.maxLikes);
 
         let html = '';
+        const hotShownIds = new Set();
 
-        // 热门回复区
-        if (top5.length > 0) {
+        // ===== 热门区 =====
+        if (hotParentsArray.length > 0) {
             html += `<div class="sort-divider"><span class="sort-icon">🔥</span><span class="sort-text">热门回复</span><span class="sort-line"></span></div>`;
-            html += top5.map((r, i) => renderReplyCard(r, i < 5)).join('');
+
+            hotParentsArray.forEach(({ parent, children }) => {
+                const parentIsHot = top5Ids.has(parent.id);
+                const hasHotChild = children.some(c => top5Ids.has(c.id));
+
+                // 子回复按点赞排序（热门优先）
+                const sortedChildren = [...children].sort((a, b) => {
+                    const likeDiff = (b.likes || 0) - (a.likes || 0);
+                    if (likeDiff !== 0) return likeDiff;
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+
+                if (parentIsHot) {
+                    // 父评论本身是热门 → 完整显示 + 热门标签
+                    hotShownIds.add(parent.id);
+                    html += renderReplyCard(parent, true, false, false);
+                    // 子回复缩进显示
+                    sortedChildren.forEach(child => {
+                        hotShownIds.add(child.id);
+                        html += renderReplyCard(child, top5Ids.has(child.id), true, false);
+                    });
+                } else if (hasHotChild) {
+                    // 父评论仅作为上下文 → 缩进 + 淡化显示
+                    hotShownIds.add(parent.id);
+                    html += renderReplyCard(parent, false, true, true);
+                    // 子回复：热门的完整显示，非热门的缩进显示
+                    sortedChildren.forEach(child => {
+                        hotShownIds.add(child.id);
+                        const childIsHot = top5Ids.has(child.id);
+                        // 热门子回复不缩进（完整显示），非热门子回复缩进
+                        html += renderReplyCard(child, childIsHot, !childIsHot, false);
+                    });
+                }
+            });
         }
 
-        // 最新回复区
-        if (rest.length > 0) {
+        // ===== 最新区 =====
+        const restTopLevel = topLevelReplies
+            .filter(r => !hotShownIds.has(r.id))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        if (restTopLevel.length > 0) {
             html += `<div class="sort-divider"><span class="sort-icon">🕒</span><span class="sort-text">最新回复</span><span class="sort-line"></span></div>`;
-            html += rest.map(r => renderReplyCard(r, false)).join('');
+            restTopLevel.forEach(r => {
+                html += renderReplyCard(r, false, false, false);
+                if (childrenMap[r.id]) {
+                    const sortedChildren = [...childrenMap[r.id]].sort((a, b) =>
+                        new Date(b.created_at) - new Date(a.created_at));
+                    sortedChildren.forEach(child => {
+                        html += renderReplyCard(child, false, true, false);
+                    });
+                }
+            });
         }
 
         list.innerHTML = html;
     }
 
-    function renderReplyCard(r, isHot) {
+    function renderReplyCard(r, isHot, isIndented, isContext) {
         const rName = r.author_name || '匿名用户';
         const rAvatar = r.author_avatar || flagMap[r.country_code] || '🌍';
         const likeCount = r.likes || 0;
@@ -222,8 +307,12 @@
         const dislikeClass = myVote === 'dislike' ? 'dislike-active' : '';
         const hotBadge = isHot ? '<span class="hot-badge">热门</span>' : '';
 
+        let cardClass = 'reply-card';
+        if (isIndented) cardClass += ' reply-card-child';
+        if (isContext) cardClass += ' reply-card-context';
+
         return `
-            <div class="reply-card" id="reply-${r.id}">
+            <div class="${cardClass}" id="reply-${r.id}">
                 <div class="reply-author">
                     <div class="reply-avatar">${rAvatar}</div>
                     <div class="reply-author-info">
@@ -238,126 +327,202 @@
                 </div>
                 <div class="reply-content">${r.content}</div>
                 <div class="reply-actions">
-                    <div class="vote-btn ${likeClass}" id="like-btn-${r.id}" onclick="toggleVote('${r.id}', 'like')">👍 <span id="like-count-${r.id}">${likeCount}</span></div>
-                    <div class="vote-btn ${dislikeClass}" id="dislike-btn-${r.id}" onclick="toggleVote('${r.id}', 'dislike')">👎 <span id="dislike-count-${r.id}">${dislikeCount}</span></div>
+                    <div class="vote-btn ${likeClass}" id="like-btn-${r.id}" onclick="toggleVote('${r.id}', 'like')">
+                        👍 <span class="vote-count" id="like-count-${r.id}">${likeCount}</span>
+                    </div>
+                    <div class="vote-btn ${dislikeClass}" id="dislike-btn-${r.id}" onclick="toggleVote('${r.id}', 'dislike')">
+                        👎 <span class="vote-count" id="dislike-count-${r.id}">${dislikeCount}</span>
+                    </div>
+                    <div class="reply-action-btn" onclick="toggleInlineReply('${r.id}')">💬 回复</div>
+                </div>
+                <div id="inline-reply-input-${r.id}" class="inline-reply-input" style="display:none;">
+                    <textarea class="inline-reply-textarea" id="inline-reply-text-${r.id}"
+                        placeholder="回复 ${rName}..." rows="1"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitInlineReply('${r.id}');}"></textarea>
+                    <div class="inline-reply-actions">
+                        <button class="inline-reply-cancel" onclick="toggleInlineReply('${r.id}')">取消</button>
+                        <button class="inline-reply-submit" id="inline-submit-${r.id}" onclick="submitInlineReply('${r.id}')">发送</button>
+                    </div>
                 </div>
             </div>
         `;
     }
 
-    // 乐观更新：先改 UI，再写库，失败回滚
-    async function toggleVote(replyId, type) {
-        if (!currentUser) return;
-        if (votingLocks[replyId]) return; // 防止快速连点
-        votingLocks[replyId] = true;
+    // ===== 内联回复 =====
+    function toggleInlineReply(replyId) {
+        const el = document.getElementById(`inline-reply-input-${replyId}`);
+        if (!el) return;
 
-        const existing = userVotes[replyId];
-        const r = replyData[replyId];
-        if (!r) { votingLocks[replyId] = false; return; }
-
-        // 保存旧状态用于回滚
-        const oldLikes = r.likes || 0;
-        const oldDislikes = r.dislikes || 0;
-        const oldVote = existing;
-
-        // 计算新状态
-        let newLikes = oldLikes;
-        let newDislikes = oldDislikes;
-        let newVote = oldVote;
-
-        if (existing === type) {
-            // 取消投票
-            newVote = null;
-            if (type === 'like') newLikes = Math.max(0, oldLikes - 1);
-            else newDislikes = Math.max(0, oldDislikes - 1);
-        } else {
-            // 新投票或切换方向
-            if (existing === 'like') newLikes = Math.max(0, oldLikes - 1);
-            if (existing === 'dislike') newDislikes = Math.max(0, oldDislikes - 1);
-            if (type === 'like') newLikes += 1;
-            else newDislikes += 1;
-            newVote = type;
+        // 关闭其他打开的输入框
+        if (activeReplyInput && activeReplyInput !== replyId) {
+            const prev = document.getElementById(`inline-reply-input-${activeReplyInput}`);
+            if (prev) prev.style.display = 'none';
         }
 
-        // 立即更新 UI（乐观更新）
-        updateVoteUI(replyId, newLikes, newDislikes, newVote);
-
-        // 更新本地缓存和状态
-        r.likes = newLikes;
-        r.dislikes = newDislikes;
-        if (newVote) {
-            userVotes[replyId] = newVote;
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'block';
+            activeReplyInput = replyId;
+            setTimeout(() => document.getElementById(`inline-reply-text-${replyId}`).focus(), 50);
         } else {
-            delete userVotes[replyId];
-        }
-
-        // 后台写库
-        try {
-            if (oldVote === type) {
-                // 取消投票
-                await client.from('reply_votes')
-                    .delete()
-                    .eq('reply_id', replyId)
-                    .eq('user_id', currentUser.id);
-                await adjustCount(replyId, type, -1);
-            } else {
-                if (oldVote) {
-                    // 切换方向：先删旧票
-                    await client.from('reply_votes')
-                        .delete()
-                        .eq('reply_id', replyId)
-                        .eq('user_id', currentUser.id);
-                    await adjustCount(replyId, oldVote, -1);
-                }
-                // 写新票
-                await client.from('reply_votes')
-                    .insert({ reply_id: replyId, user_id: currentUser.id, vote_type: type });
-                await adjustCount(replyId, type, 1);
-            }
-        } catch (err) {
-            // 写库失败，回滚 UI 和状态
-            r.likes = oldLikes;
-            r.dislikes = oldDislikes;
-            if (oldVote) {
-                userVotes[replyId] = oldVote;
-            } else {
-                delete userVotes[replyId];
-            }
-            updateVoteUI(replyId, oldLikes, oldDislikes, oldVote);
-            alert('操作失败: ' + err.message);
-        } finally {
-            votingLocks[replyId] = false;
+            el.style.display = 'none';
+            activeReplyInput = null;
         }
     }
 
-    // 直接更新 DOM 中的投票数字和按钮样式
-    function updateVoteUI(replyId, likeCount, dislikeCount, myVote) {
+    async function submitInlineReply(replyId) {
+        const text = document.getElementById(`inline-reply-text-${replyId}`).value.trim();
+        if (!text) return;
+        if (text.length < 5) { alert('回复内容至少5个字'); return; }
+
+        const submitBtn = document.getElementById(`inline-submit-${replyId}`);
+        submitBtn.disabled = true;
+        submitBtn.innerText = '发送中...';
+
+        // 确定父评论 ID：如果回复的是子回复，取其根父 ID；否则用当前回复 ID
+        const targetReply = replyData[replyId];
+        let parentId = replyId;
+        if (targetReply && targetReply.parent_id) {
+            parentId = targetReply.parent_id;
+        }
+
+        try {
+            const { data: { session } } = await client.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const username = session.user.user_metadata?.username || '匿名用户';
+            const avatar = session.user.user_metadata?.avatar || '🌍';
+
+            const { error } = await client.from('replies').insert({
+                post_id: postId,
+                user_id: session.user.id,
+                country_code: userCountry,
+                content: text,
+                author_name: username,
+                author_avatar: avatar,
+                likes: 0,
+                dislikes: 0,
+                parent_id: parentId
+            });
+
+            if (error) throw error;
+
+            // 关闭输入框，重新加载
+            activeReplyInput = null;
+            loadReplies();
+
+        } catch (err) {
+            alert('回复失败: ' + err.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = '发送';
+        }
+    }
+
+    // ===== 投票（乐观更新，不重新加载列表）=====
+    async function toggleVote(replyId, type) {
+        if (votingLocks[replyId]) return;
+        votingLocks[replyId] = true;
+
+        const currentVote = userVotes[replyId];
         const likeCountEl = document.getElementById(`like-count-${replyId}`);
         const dislikeCountEl = document.getElementById(`dislike-count-${replyId}`);
         const likeBtn = document.getElementById(`like-btn-${replyId}`);
         const dislikeBtn = document.getElementById(`dislike-btn-${replyId}`);
 
-        if (likeCountEl) likeCountEl.textContent = likeCount;
-        if (dislikeCountEl) dislikeCountEl.textContent = dislikeCount;
+        if (!likeCountEl || !dislikeCountEl) { votingLocks[replyId] = false; return; }
 
-        if (likeBtn) {
-            likeBtn.classList.toggle('like-active', myVote === 'like');
+        // 保存旧值用于回滚
+        const oldLikeCount = parseInt(likeCountEl.textContent) || 0;
+        const oldDislikeCount = parseInt(dislikeCountEl.textContent) || 0;
+        const oldVote = currentVote;
+
+        // 计算新值
+        let newLikeCount = oldLikeCount;
+        let newDislikeCount = oldDislikeCount;
+        let newVote = null;
+
+        if (type === 'like') {
+            if (currentVote === 'like') {
+                // 取消赞
+                newLikeCount = oldLikeCount - 1;
+                newVote = null;
+            } else {
+                // 切换到赞
+                newLikeCount = oldLikeCount + 1;
+                if (currentVote === 'dislike') {
+                    newDislikeCount = oldDislikeCount - 1;
+                }
+                newVote = 'like';
+            }
+        } else {
+            if (currentVote === 'dislike') {
+                // 取消踩
+                newDislikeCount = oldDislikeCount - 1;
+                newVote = null;
+            } else {
+                // 切换到踩
+                newDislikeCount = oldDislikeCount + 1;
+                if (currentVote === 'like') {
+                    newLikeCount = oldLikeCount - 1;
+                }
+                newVote = 'dislike';
+            }
         }
-        if (dislikeBtn) {
-            dislikeBtn.classList.toggle('dislike-active', myVote === 'dislike');
+
+        // 乐观更新 UI
+        likeCountEl.textContent = newLikeCount;
+        dislikeCountEl.textContent = newDislikeCount;
+        likeBtn.className = 'vote-btn' + (newVote === 'like' ? ' like-active' : '');
+        dislikeBtn.className = 'vote-btn' + (newVote === 'dislike' ? ' dislike-active' : '');
+        userVotes[replyId] = newVote;
+
+        // 更新缓存数据
+        if (replyData[replyId]) {
+            replyData[replyId].likes = newLikeCount;
+            replyData[replyId].dislikes = newDislikeCount;
         }
+
+        // 写库
+        try {
+            if (oldVote) {
+                // 已有投票 → 先删再插（切换或取消）
+                await client.from('reply_votes')
+                    .delete()
+                    .eq('reply_id', replyId)
+                    .eq('user_id', currentUser.id);
+            }
+
+            if (newVote) {
+                await client.from('reply_votes').insert({
+                    reply_id: replyId,
+                    user_id: currentUser.id,
+                    vote_type: newVote
+                });
+            }
+
+            // 更新 replies 表的计数
+            await client.from('replies').update({
+                likes: newLikeCount,
+                dislikes: newDislikeCount
+            }).eq('id', replyId);
+
+        } catch (err) {
+            // 回滚
+            likeCountEl.textContent = oldLikeCount;
+            dislikeCountEl.textContent = oldDislikeCount;
+            likeBtn.className = 'vote-btn' + (oldVote === 'like' ? ' like-active' : '');
+            dislikeBtn.className = 'vote-btn' + (oldVote === 'dislike' ? ' dislike-active' : '');
+            userVotes[replyId] = oldVote;
+            if (replyData[replyId]) {
+                replyData[replyId].likes = oldLikeCount;
+                replyData[replyId].dislikes = oldDislikeCount;
+            }
+            alert('操作失败，请重试');
+        }
+
+        votingLocks[replyId] = false;
     }
 
-    // 调整 replies 表的 likes/dislikes 计数
-    async function adjustCount(replyId, type, delta) {
-        const column = type === 'like' ? 'likes' : 'dislikes';
-        const { data } = await client.from('replies').select(column).eq('id', replyId).single();
-        if (data) {
-            const newVal = Math.max(0, (data[column] || 0) + delta);
-            await client.from('replies').update({ [column]: newVal }).eq('id', replyId);
-        }
-    }
-
+    // ===== 底部回复框（顶级评论）=====
     async function submitReply() {
         if (cooldownActive) return;
 
@@ -367,7 +532,6 @@
 
         const btn = document.getElementById('replyBtn');
 
-        // 如果是非本国用户回复，触发15秒冷静期
         if (!isOwnPost) {
             cooldownActive = true;
             btn.disabled = true;
@@ -412,7 +576,8 @@
                 author_name: username,
                 author_avatar: avatar,
                 likes: 0,
-                dislikes: 0
+                dislikes: 0,
+                parent_id: null
             });
 
             if (error) throw error;
@@ -443,7 +608,6 @@
         await loadPost();
         await loadReplies();
 
-        // 判断是否本国帖子
         const { data: post } = await client.from('posts').select('country_code').eq('id', postId).single();
         isOwnPost = post && post.country_code === userCountry;
     }
