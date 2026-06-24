@@ -27,15 +27,12 @@
         .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 0; display: flex; align-items: center; gap: 6px; }
         .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
 
-        .sort-divider { display: flex; align-items: center; gap: 8px; padding: 12px 16px 8px; }
-        .sort-divider .sort-icon { font-size: 14px; }
-        .sort-divider .sort-text { font-size: 13px; font-weight: 700; color: #374151; }
-        .sort-divider .sort-line { flex: 1; height: 1px; background: #e5e7eb; }
+        /* 热门 / 最新区域标题 */
+        .area-title { font-size: 13px; font-weight: 700; color: #6b7280; padding: 12px 16px 6px; display: flex; align-items: center; gap: 6px; }
+        .hot-tag { font-size: 10px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
 
-        .reply-card { background: white; border-radius: 12px; padding: 14px; margin: 0 16px 8px; border: 1px solid #f0f1f3; transition: opacity 0.15s; }
-        .reply-card-child { margin-left: 44px; border-left: 3px solid #e5e7eb; }
-        .reply-card-context { opacity: 0.6; background: #f9fafb; border-style: dashed; }
-        .reply-card-context .reply-content { font-size: 13px; color: #6b7280; }
+        .reply-card { background: white; border-radius: 12px; padding: 14px; margin: 0 16px 8px; border: 1px solid #f0f1f3; }
+        .reply-card.hot { border-color: #fde68a; background: #fffbeb; }
 
         .reply-author { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .reply-avatar { width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
@@ -44,40 +41,55 @@
         .reply-meta { display: flex; align-items: center; gap: 6px; }
         .reply-meta span { font-size: 11px; color: #9ca3af; }
         .reply-time { font-size: 11px; color: #9ca3af; margin-left: auto; }
+
         .reply-content { font-size: 14px; color: #374151; line-height: 1.5; padding-left: 40px; }
 
-        .hot-badge { font-size: 10px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 2px 7px; border-radius: 6px; margin-left: auto; }
+        /* 父评论引用块（折叠状态） */
+        .parent-quote { margin: 0 0 8px 40px; background: #f3f4f6; border-radius: 8px; padding: 8px 12px; border-left: 3px solid #d1d5db; }
+        .parent-quote-name { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 2px; }
+        .parent-quote-text { font-size: 13px; color: #9ca3af; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        .reply-actions { display: flex; align-items: center; gap: 4px; padding-left: 40px; margin-top: 8px; }
-        .vote-btn { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 8px; font-size: 13px; color: #6b7280; cursor: pointer; user-select: none; transition: all 0.12s; }
+        /* 子回复区域 */
+        .children-container { margin-left: 40px; margin-top: 8px; }
+        .child-reply-card { background: #f9fafb; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; border: 1px solid #f0f1f3; }
+        .child-reply-card.hot { border-color: #fde68a; background: #fffbeb; }
+        .child-author { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .child-avatar { width: 24px; height: 24px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .child-author-name { font-size: 12px; font-weight: 700; color: #1a1a2e; }
+        .child-meta span { font-size: 10px; color: #9ca3af; }
+        .child-content { font-size: 13px; color: #374151; line-height: 1.4; padding-left: 30px; }
+
+        .toggle-children { font-size: 12px; color: #2563eb; cursor: pointer; padding: 4px 0; user-select: none; margin-left: 40px; }
+        .toggle-children:hover { text-decoration: underline; }
+
+        /* 投票按钮区 */
+        .vote-bar { display: flex; align-items: center; gap: 16px; padding: 8px 0 0 40px; }
+        .vote-btn { display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; font-size: 13px; color: #6b7280; padding: 4px 8px; border-radius: 6px; transition: all 0.15s; }
         .vote-btn:hover { background: #f3f4f6; }
-        .vote-btn.like-active { color: #2563eb; background: #eff6ff; }
-        .vote-btn.dislike-active { color: #ef4444; background: #fef2f2; }
-        .vote-btn:active { transform: scale(0.92); }
-        .vote-btn .vote-count { font-weight: 600; font-size: 12px; }
+        .vote-btn.liked { color: #2563eb; font-weight: 700; }
+        .vote-btn.disliked { color: #ef4444; font-weight: 700; }
+        .vote-icon { font-size: 15px; }
+        .vote-count { min-width: 16px; text-align: center; }
 
-        .reply-action-btn { font-size: 12px; color: #9ca3af; cursor: pointer; padding: 5px 10px; border-radius: 8px; transition: all 0.12s; }
+        .reply-action-btn { display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; font-size: 13px; color: #6b7280; padding: 4px 8px; border-radius: 6px; }
         .reply-action-btn:hover { background: #f3f4f6; color: #2563eb; }
 
-        .inline-reply-input { margin: 8px 0 0 40px; padding: 10px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; }
-        .inline-reply-textarea { width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; resize: none; min-height: 38px; max-height: 80px; line-height: 1.4; font-family: inherit; }
-        .inline-reply-textarea:focus { outline: none; border-color: #2563eb; }
-        .inline-reply-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
-        .inline-reply-cancel { padding: 5px 12px; border: 1px solid #d1d5db; border-radius: 8px; background: white; font-size: 12px; color: #6b7280; cursor: pointer; }
-        .inline-reply-submit { padding: 5px 14px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .inline-reply-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .children-toggle { display: flex; align-items: center; gap: 8px; padding: 6px 16px 6px 60px; cursor: pointer; color: #6b7280; font-size: 13px; transition: color 0.12s; margin-bottom: 4px; }
-        .children-toggle:hover { color: #2563eb; }
-        .children-toggle .toggle-line { width: 16px; height: 1px; background: #d1d5db; }
-        .children-toggle .toggle-text { font-weight: 500; }
+        /* 内联回复框 */
+        .inline-reply-box { margin: 8px 0 0 40px; display: none; }
+        .inline-reply-box.active { display: block; }
+        .inline-reply-row { display: flex; gap: 8px; align-items: flex-end; }
+        .inline-reply-input { flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 13px; resize: none; min-height: 38px; max-height: 80px; line-height: 1.4; }
+        .inline-reply-input:focus { outline: none; border-color: #2563eb; }
+        .inline-reply-btn { padding: 10px 14px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .inline-reply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .inline-reply-hint { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 
         .empty-replies { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
         .loading { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
 
         .reply-box { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; padding: 12px 16px 28px; }
         .reply-input-row { display: flex; gap: 10px; align-items: flex-end; }
-        .reply-input { flex: 1; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; line-height: 1.4; font-family: inherit; }
+        .reply-input { flex: 1; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; resize: none; min-height: 44px; max-height: 100px; line-height: 1.4; }
         .reply-input:focus { outline: none; border-color: #2563eb; }
         .reply-btn { padding: 12px 18px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .reply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -129,14 +141,9 @@
     let currentUser = null;
     let isOwnPost = false;
     let cooldownActive = false;
-
-    // 缓存数据
-    let replyData = {};        // 所有回复，按 id 索引
-    let topLevelReplies = [];   // 顶级评论
-    let childrenMap = {};       // parentId -> [子回复]
-    let userVotes = {};         // replyId -> 'like' | 'dislike'
-    let votingLocks = {};       // 防并发
-    let activeReplyInput = null; // 当前打开的内联回复输入框
+    let replyData = [];
+    let userVotes = {};
+    let votingLocks = {};
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
@@ -144,6 +151,12 @@
         if (diff < 3600) return Math.floor(diff/60) + '分钟前';
         if (diff < 86400) return Math.floor(diff/3600) + '小时前';
         return Math.floor(diff/86400) + '天前';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     async function loadPost() {
@@ -161,7 +174,7 @@
                 <div class="post-author">
                     <div class="author-avatar">${authorAvatar}</div>
                     <div class="author-info">
-                        <div class="author-name">${authorName}</div>
+                        <div class="author-name">${escapeHtml(authorName)}</div>
                         <div class="author-meta">
                             <span>${flagMap[data.country_code] || '🌍'} ${countryMap[data.country_code] || data.country_code}</span>
                             <span>·</span>
@@ -169,25 +182,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="post-title">${data.title}</div>
-                <div class="post-content">${data.content}</div>
+                <div class="post-title">${escapeHtml(data.title)}</div>
+                <div class="post-content">${escapeHtml(data.content)}</div>
             </div>
         `;
     }
 
-    async function loadUserVotes(replyIds) {
-        if (!currentUser || replyIds.length === 0) return;
-        const { data } = await client.from('reply_votes')
-            .select('reply_id, vote_type')
-            .eq('user_id', currentUser.id)
-            .in('reply_id', replyIds);
-        if (data) {
-            data.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
-        }
-    }
-
     async function loadReplies() {
-        activeReplyInput = null;
         const { data, error } = await client.from('replies')
             .select('*').eq('post_id', postId).order('created_at', { ascending: true });
         const list = document.getElementById('repliesList');
@@ -195,238 +196,274 @@
         if (error) { list.innerHTML = '<div class="empty-replies">加载失败</div>'; return; }
         if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">还没有回复，来发第一条跨国评论 🌍</div>'; return; }
 
-        // 缓存所有回复
-        replyData = {};
-        data.forEach(r => { replyData[r.id] = r; });
+        replyData = data;
+
+        // 加载当前用户的投票记录
+        const { data: votes } = await client.from('reply_votes')
+            .select('reply_id, vote_type').eq('user_id', currentUser.id);
+        userVotes = {};
+        if (votes) votes.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
+
+        renderReplies();
+    }
+
+    function renderReplies() {
+        const list = document.getElementById('repliesList');
 
         // 分离顶级评论和子回复
-        topLevelReplies = data.filter(r => !r.parent_id || !replyData[r.parent_id]);
-        childrenMap = {};
-        data.filter(r => r.parent_id && replyData[r.parent_id]).forEach(r => {
-            if (!childrenMap[r.parent_id]) childrenMap[r.parent_id] = [];
-            childrenMap[r.parent_id].push(r);
+        const topLevel = replyData.filter(r => !r.parent_id);
+        const childMap = {};
+        replyData.filter(r => r.parent_id).forEach(r => {
+            if (!childMap[r.parent_id]) childMap[r.parent_id] = [];
+            childMap[r.parent_id].push(r);
         });
 
-        // 加载用户投票记录
-        userVotes = {};
-        await loadUserVotes(data.map(r => r.id));
-
-        // 所有回复按点赞排序，取前5为热门
-        const allRanked = [...data].sort((a, b) => {
-            const likeDiff = (b.likes || 0) - (a.likes || 0);
-            if (likeDiff !== 0) return likeDiff;
-            return new Date(b.created_at) - new Date(a.created_at);
-        });
-        const top5 = allRanked.slice(0, 5);
+        // 所有评论（含子回复）一起按 likes 排序
+        const allSorted = [...replyData].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        const top5 = allSorted.slice(0, 5);
         const top5Ids = new Set(top5.map(r => r.id));
 
-        // 找出热门区需要显示的根父评论
-        const hotParentIds = new Set();
-        top5.forEach(r => {
-            const rootId = r.parent_id || r.id;
-            hotParentIds.add(rootId);
-        });
-
-        // 按「组内最高点赞」排序热门父评论
-        const hotParentsArray = [...hotParentIds].map(parentId => {
-            const parent = replyData[parentId];
-            const children = childrenMap[parentId] || [];
-            const allInGroup = [parent, ...children];
-            const maxLikes = Math.max(...allInGroup.map(r => r.likes || 0));
-            return { parent, children, maxLikes };
-        }).sort((a, b) => b.maxLikes - a.maxLikes);
+        // 最新区：剩余的顶级评论按时间倒序
+        const remainingTopLevel = topLevel
+            .filter(r => !top5Ids.has(r.id))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         let html = '';
-        const hotShownIds = new Set();
 
-        // ===== 热门区 =====
-        if (hotParentsArray.length > 0) {
-            html += `<div class="sort-divider"><span class="sort-icon">🔥</span><span class="sort-text">热门回复</span><span class="sort-line"></span></div>`;
-
-            hotParentsArray.forEach(({ parent, children }) => {
-                const parentIsHot = top5Ids.has(parent.id);
-                const hasHotChild = children.some(c => top5Ids.has(c.id));
-
-                // 子回复按时间从旧到新排序
-                const sortedChildren = [...children].sort((a, b) =>
-                    new Date(a.created_at) - new Date(b.created_at));
-
-                if (parentIsHot) {
-                    // 父评论本身是热门 → 完整显示 + 热门标签
-                    hotShownIds.add(parent.id);
-                    html += renderReplyCard(parent, true, false, false);
-                    // 子回复：如果有热门子回复则自动展开，否则收起
-                    if (sortedChildren.length > 0) {
-                        html += renderChildrenBlock(parent.id, sortedChildren, top5Ids, hasHotChild);
-                        sortedChildren.forEach(c => hotShownIds.add(c.id));
-                    }
-                } else if (hasHotChild) {
-                    // 父评论仅作为上下文 → 缩进 + 淡化显示
-                    hotShownIds.add(parent.id);
-                    html += renderReplyCard(parent, false, true, true);
-                    // 有热门子回复 → 自动展开
-                    if (sortedChildren.length > 0) {
-                        html += renderChildrenBlock(parent.id, sortedChildren, top5Ids, true);
-                        sortedChildren.forEach(c => hotShownIds.add(c.id));
-                    }
+        // === 热门区 ===
+        if (top5.length > 0) {
+            html += '<div class="area-title">🔥 热门回复</div>';
+            top5.forEach(r => {
+                if (!r.parent_id) {
+                    // 热门顶级评论：完整显示 + 子回复折叠
+                    html += renderTopReply(r, childMap, top5Ids, true);
+                } else {
+                    // 热门子回复：父评论以引用块折叠显示，子回复本身完整显示
+                    const parent = replyData.find(p => p.id === r.parent_id);
+                    html += renderHotChildReply(r, parent, top5Ids);
                 }
             });
         }
 
-        // ===== 最新区 =====
-        const restTopLevel = topLevelReplies
-            .filter(r => !hotShownIds.has(r.id))
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        if (restTopLevel.length > 0) {
-            html += `<div class="sort-divider"><span class="sort-icon">🕒</span><span class="sort-text">最新回复</span><span class="sort-line"></span></div>`;
-            restTopLevel.forEach(r => {
-                html += renderReplyCard(r, false, false, false);
-                if (childrenMap[r.id] && childrenMap[r.id].length > 0) {
-                    // 最新区子回复按时间从旧到新排序，默认收起
-                    const sortedChildren = [...childrenMap[r.id]].sort((a, b) =>
-                        new Date(a.created_at) - new Date(b.created_at));
-                    html += renderChildrenBlock(r.id, sortedChildren, top5Ids, false);
-                }
+        // === 最新区 ===
+        if (remainingTopLevel.length > 0) {
+            html += '<div class="area-title">🕒 最新回复</div>';
+            remainingTopLevel.forEach(r => {
+                html += renderTopReply(r, childMap, top5Ids, false);
             });
         }
 
         list.innerHTML = html;
     }
 
-    // 渲染子回复区块（带收起/展开切换）
-    function renderChildrenBlock(parentId, children, top5Ids, autoExpand) {
-        const childCount = children.length;
-        if (childCount === 0) return '';
-
-        const containerDisplay = autoExpand ? 'block' : 'none';
-        const toggleDisplay = autoExpand ? 'none' : 'flex';
-        const toggleText = `查看${childCount}条回复`;
-
-        let html = '';
-
-        // 展开/收起按钮（自动展开时隐藏）
-        html += `<div class="children-toggle" id="children-toggle-${parentId}" onclick="toggleChildren('${parentId}')" style="display:${toggleDisplay};">
-            <span class="toggle-line"></span>
-            <span class="toggle-text">${toggleText}</span>
-        </div>`;
-
-        // 子回复容器
-        html += `<div id="children-container-${parentId}" style="display:${containerDisplay};">`;
-        children.forEach(child => {
-            html += renderReplyCard(child, top5Ids.has(child.id), true, false);
-        });
-        html += `</div>`;
-
-        return html;
-    }
-
-    // 切换子回复展开/收起
-    function toggleChildren(parentId) {
-        const container = document.getElementById(`children-container-${parentId}`);
-        const toggle = document.getElementById(`children-toggle-${parentId}`);
-        if (!container || !toggle) return;
-
-        const toggleText = toggle.querySelector('.toggle-text');
-
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            toggleText.textContent = '收起回复';
-        } else {
-            container.style.display = 'none';
-            const count = (childrenMap[parentId] || []).length;
-            toggleText.textContent = `查看${count}条回复`;
-        }
-    }
-
-    function renderReplyCard(r, isHot, isIndented, isContext) {
+    // 渲染顶级评论（热门或最新区通用）
+    function renderTopReply(r, childMap, top5Ids, isHot) {
+        const children = (childMap[r.id] || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         const rName = r.author_name || '匿名用户';
         const rAvatar = r.author_avatar || flagMap[r.country_code] || '🌍';
-        const likeCount = r.likes || 0;
-        const dislikeCount = r.dislikes || 0;
         const myVote = userVotes[r.id];
+        const likes = r.likes || 0;
+        const dislikes = r.dislikes || 0;
 
-        const likeClass = myVote === 'like' ? 'like-active' : '';
-        const dislikeClass = myVote === 'dislike' ? 'dislike-active' : '';
-        const hotBadge = isHot ? '<span class="hot-badge">热门</span>' : '';
-
-        let cardClass = 'reply-card';
-        if (isIndented) cardClass += ' reply-card-child';
-        if (isContext) cardClass += ' reply-card-context';
-
-        return `
-            <div class="${cardClass}" id="reply-${r.id}">
+        let html = `
+            <div class="reply-card ${isHot ? 'hot' : ''}" id="reply-${r.id}">
+                ${isHot ? '<span class="hot-tag" style="position:relative;top:-4px;left:-4px;">HOT</span>' : ''}
                 <div class="reply-author">
                     <div class="reply-avatar">${rAvatar}</div>
                     <div class="reply-author-info">
-                        <div class="reply-author-name">${rName}</div>
+                        <div class="reply-author-name">${escapeHtml(rName)}</div>
                         <div class="reply-meta">
                             <span>${flagMap[r.country_code] || '🌍'} ${countryMap[r.country_code] || r.country_code}</span>
                             <span>·</span>
                             <span class="reply-time">${timeAgo(r.created_at)}</span>
                         </div>
                     </div>
-                    ${hotBadge}
                 </div>
-                <div class="reply-content">${r.content}</div>
-                <div class="reply-actions">
-                    <div class="vote-btn ${likeClass}" id="like-btn-${r.id}" onclick="toggleVote('${r.id}', 'like')">
-                        👍 <span class="vote-count" id="like-count-${r.id}">${likeCount}</span>
-                    </div>
-                    <div class="vote-btn ${dislikeClass}" id="dislike-btn-${r.id}" onclick="toggleVote('${r.id}', 'dislike')">
-                        👎 <span class="vote-count" id="dislike-count-${r.id}">${dislikeCount}</span>
-                    </div>
-                    <div class="reply-action-btn" onclick="toggleInlineReply('${r.id}')">💬 回复</div>
+                <div class="reply-content">${escapeHtml(r.content)}</div>
+                <div class="vote-bar">
+                    <button class="vote-btn ${myVote === 'like' ? 'liked' : ''}" id="like-btn-${r.id}" onclick="handleVote('${r.id}', 'like')">
+                        <span class="vote-icon">👍</span>
+                        <span class="vote-count" id="like-count-${r.id}">${likes}</span>
+                    </button>
+                    <button class="vote-btn ${myVote === 'dislike' ? 'disliked' : ''}" id="dislike-btn-${r.id}" onclick="handleVote('${r.id}', 'dislike')">
+                        <span class="vote-icon">👎</span>
+                        <span class="vote-count" id="dislike-count-${r.id}">${dislikes}</span>
+                    </button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${r.id}')">💬 回复</button>
                 </div>
-                <div id="inline-reply-input-${r.id}" class="inline-reply-input" style="display:none;">
-                    <textarea class="inline-reply-textarea" id="inline-reply-text-${r.id}"
-                        placeholder="回复 ${rName}..." rows="1"
-                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitInlineReply('${r.id}');}"></textarea>
-                    <div class="inline-reply-actions">
-                        <button class="inline-reply-cancel" onclick="toggleInlineReply('${r.id}')">取消</button>
-                        <button class="inline-reply-submit" id="inline-submit-${r.id}" onclick="submitInlineReply('${r.id}')">发送</button>
+                <div class="inline-reply-box" id="inline-reply-${r.id}">
+                    <div class="inline-reply-row">
+                        <textarea class="inline-reply-input" id="inline-input-${r.id}" placeholder="回复 ${escapeHtml(rName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${r.id}')">发送</button>
                     </div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
+                </div>
+        `;
+
+        // 子回复区域
+        if (children.length > 0) {
+            html += `<div class="toggle-children" id="toggle-${r.id}" onclick="toggleChildren('${r.id}')">查看${children.length}条回复 ▾</div>`;
+            html += `<div class="children-container" id="children-${r.id}" style="display:none;">`;
+            children.forEach(c => {
+                html += renderChildReply(c, top5Ids, false);
+            });
+            html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    // 渲染热门子回复（父评论以引用块折叠显示在上方）
+    function renderHotChildReply(child, parent, top5Ids) {
+        const cName = child.author_name || '匿名用户';
+        const cAvatar = child.author_avatar || flagMap[child.country_code] || '🌍';
+        const myVote = userVotes[child.id];
+        const likes = child.likes || 0;
+        const dislikes = child.dislikes || 0;
+
+        let html = `
+            <div class="reply-card hot" id="reply-${child.id}">
+                <span class="hot-tag" style="position:relative;top:-4px;left:-4px;">HOT</span>
+        `;
+
+        // 父评论引用块（折叠状态）
+        if (parent) {
+            const pName = parent.author_name || '匿名用户';
+            const pAvatar = parent.author_avatar || flagMap[parent.country_code] || '🌍';
+            html += `
+                <div class="parent-quote">
+                    <div class="parent-quote-name">${escapeHtml(pName)}</div>
+                    <div class="parent-quote-text">${escapeHtml(parent.content)}</div>
+                </div>
+            `;
+        }
+
+        // 子回复本身完整显示
+        html += `
+                <div class="reply-author">
+                    <div class="reply-avatar">${cAvatar}</div>
+                    <div class="reply-author-info">
+                        <div class="reply-author-name">${escapeHtml(cName)}</div>
+                        <div class="reply-meta">
+                            <span>${flagMap[child.country_code] || '🌍'} ${countryMap[child.country_code] || child.country_code}</span>
+                            <span>·</span>
+                            <span class="reply-time">${timeAgo(child.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="reply-content">${escapeHtml(child.content)}</div>
+                <div class="vote-bar">
+                    <button class="vote-btn ${myVote === 'like' ? 'liked' : ''}" id="like-btn-${child.id}" onclick="handleVote('${child.id}', 'like')">
+                        <span class="vote-icon">👍</span>
+                        <span class="vote-count" id="like-count-${child.id}">${likes}</span>
+                    </button>
+                    <button class="vote-btn ${myVote === 'dislike' ? 'disliked' : ''}" id="dislike-btn-${child.id}" onclick="handleVote('${child.id}', 'dislike')">
+                        <span class="vote-icon">👎</span>
+                        <span class="vote-count" id="dislike-count-${child.id}">${dislikes}</span>
+                    </button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${child.id}')">💬 回复</button>
+                </div>
+                <div class="inline-reply-box" id="inline-reply-${child.id}">
+                    <div class="inline-reply-row">
+                        <textarea class="inline-reply-input" id="inline-input-${child.id}" placeholder="回复 ${escapeHtml(cName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${child.id}')">发送</button>
+                    </div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
+                </div>
+            </div>
+        `;
+        return html;
+    }
+
+    // 渲染子回复（在父评论下方缩进显示）
+    function renderChildReply(c, top5Ids, isHotContext) {
+        const cName = c.author_name || '匿名用户';
+        const cAvatar = c.author_avatar || flagMap[c.country_code] || '🌍';
+        const myVote = userVotes[c.id];
+        const likes = c.likes || 0;
+        const dislikes = c.dislikes || 0;
+        const isHot = top5Ids.has(c.id);
+
+        return `
+            <div class="child-reply-card ${isHot ? 'hot' : ''}" id="reply-${c.id}">
+                <div class="child-author">
+                    <div class="child-avatar">${cAvatar}</div>
+                    <div>
+                        <div class="child-author-name">${escapeHtml(cName)} ${isHot ? '<span class="hot-tag">HOT</span>' : ''}</div>
+                        <div class="child-meta">
+                            <span>${flagMap[c.country_code] || '🌍'} ${countryMap[c.country_code] || c.country_code}</span>
+                            <span>·</span>
+                            <span>${timeAgo(c.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="child-content">${escapeHtml(c.content)}</div>
+                <div style="display:flex; gap:12px; padding:4px 0 0 30px;">
+                    <button class="vote-btn ${myVote === 'like' ? 'liked' : ''}" id="like-btn-${c.id}" onclick="handleVote('${c.id}', 'like')" style="font-size:11px; padding:2px 6px;">
+                        <span class="vote-icon" style="font-size:12px;">👍</span>
+                        <span class="vote-count" id="like-count-${c.id}">${likes}</span>
+                    </button>
+                    <button class="vote-btn ${myVote === 'dislike' ? 'disliked' : ''}" id="dislike-btn-${c.id}" onclick="handleVote('${c.id}', 'dislike')" style="font-size:11px; padding:2px 6px;">
+                        <span class="vote-icon" style="font-size:12px;">👎</span>
+                        <span class="vote-count" id="dislike-count-${c.id}">${dislikes}</span>
+                    </button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${c.id}')" style="font-size:11px; padding:2px 6px;">💬 回复</button>
+                </div>
+                <div class="inline-reply-box" id="inline-reply-${c.id}">
+                    <div class="inline-reply-row">
+                        <textarea class="inline-reply-input" id="inline-input-${c.id}" placeholder="回复 ${escapeHtml(cName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${c.id}')">发送</button>
+                    </div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
                 </div>
             </div>
         `;
     }
 
-    // ===== 内联回复 =====
-    function toggleInlineReply(replyId) {
-        const el = document.getElementById(`inline-reply-input-${replyId}`);
-        if (!el) return;
-
-        // 关闭其他打开的输入框
-        if (activeReplyInput && activeReplyInput !== replyId) {
-            const prev = document.getElementById(`inline-reply-input-${activeReplyInput}`);
-            if (prev) prev.style.display = 'none';
-        }
-
-        if (el.style.display === 'none' || el.style.display === '') {
-            el.style.display = 'block';
-            activeReplyInput = replyId;
-            setTimeout(() => document.getElementById(`inline-reply-text-${replyId}`).focus(), 50);
+    // 切换子回复展开/收起
+    function toggleChildren(replyId) {
+        const container = document.getElementById('children-' + replyId);
+        const toggle = document.getElementById('toggle-' + replyId);
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            toggle.textContent = '收起回复 ▴';
         } else {
-            el.style.display = 'none';
-            activeReplyInput = null;
+            container.style.display = 'none';
+            toggle.textContent = (() => {
+                const childCount = (replyData.filter(r => r.parent_id === replyId)).length;
+                return `查看${childCount}条回复 ▾`;
+            })();
         }
     }
 
-    async function submitInlineReply(replyId) {
-        const text = document.getElementById(`inline-reply-text-${replyId}`).value.trim();
-        if (!text) return;
-        if (text.length < 5) { alert('回复内容至少5个字'); return; }
-
-        const submitBtn = document.getElementById(`inline-submit-${replyId}`);
-        submitBtn.disabled = true;
-        submitBtn.innerText = '发送中...';
-
-        // 确定父评论 ID：如果回复的是子回复，取其根父 ID；否则用当前回复 ID
-        const targetReply = replyData[replyId];
-        let parentId = replyId;
-        if (targetReply && targetReply.parent_id) {
-            parentId = targetReply.parent_id;
+    // 内联回复
+    function openInlineReply(replyId) {
+        document.querySelectorAll('.inline-reply-box').forEach(el => el.classList.remove('active'));
+        const box = document.getElementById('inline-reply-' + replyId);
+        if (box) {
+            box.classList.add('active');
+            const input = document.getElementById('inline-input-' + replyId);
+            if (input) input.focus();
         }
+    }
+
+    // 关闭内联回复（点击其他区域时）
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.inline-reply-box') && !e.target.closest('.reply-action-btn')) {
+            // 不自动关闭，让用户手动操作
+        }
+    });
+
+    async function submitInlineReply(parentId) {
+        const input = document.getElementById('inline-input-' + parentId);
+        const content = input.value.trim();
+        if (!content) return;
+        if (content.length < 5) { alert('回复内容至少5个字'); return; }
+
+        const btn = input.nextElementSibling;
+        btn.disabled = true;
+        btn.innerText = '...';
 
         try {
             const { data: { session } } = await client.auth.getSession();
@@ -435,131 +472,141 @@
             const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
+            // 找到根父评论ID（如果 parentId 本身是子回复，取它的 parent_id；否则就是 parentId）
+            const parentReply = replyData.find(r => r.id === parentId);
+            const rootParentId = parentReply && parentReply.parent_id ? parentReply.parent_id : parentId;
+
             const { error } = await client.from('replies').insert({
                 post_id: postId,
                 user_id: session.user.id,
                 country_code: userCountry,
-                content: text,
+                content: content,
                 author_name: username,
                 author_avatar: avatar,
-                likes: 0,
-                dislikes: 0,
-                parent_id: parentId
+                parent_id: rootParentId
             });
 
             if (error) throw error;
 
-            // 关闭输入框，重新加载
-            activeReplyInput = null;
-            loadReplies();
+            input.value = '';
+            document.getElementById('inline-reply-' + parentId).classList.remove('active');
+            await loadReplies();
 
         } catch (err) {
             alert('回复失败: ' + err.message);
-            submitBtn.disabled = false;
-            submitBtn.innerText = '发送';
         }
+
+        btn.disabled = false;
+        btn.innerText = '发送';
     }
 
-    // ===== 投票（乐观更新，不重新加载列表）=====
-    async function toggleVote(replyId, type) {
+    // ========== 投票（乐观更新，不重载列表） ==========
+
+    async function handleVote(replyId, type) {
         if (votingLocks[replyId]) return;
         votingLocks[replyId] = true;
 
         const currentVote = userVotes[replyId];
-        const likeCountEl = document.getElementById(`like-count-${replyId}`);
-        const dislikeCountEl = document.getElementById(`dislike-count-${replyId}`);
-        const likeBtn = document.getElementById(`like-btn-${replyId}`);
-        const dislikeBtn = document.getElementById(`dislike-btn-${replyId}`);
+        const reply = replyData.find(r => r.id === replyId);
+        if (!reply) { votingLocks[replyId] = false; return; }
 
-        if (!likeCountEl || !dislikeCountEl) { votingLocks[replyId] = false; return; }
+        const likeBtn = document.getElementById('like-btn-' + replyId);
+        const dislikeBtn = document.getElementById('dislike-btn-' + replyId);
+        const likeCountEl = document.getElementById('like-count-' + replyId);
+        const dislikeCountEl = document.getElementById('dislike-count-' + replyId);
 
-        // 保存旧值用于回滚
-        const oldLikeCount = parseInt(likeCountEl.textContent) || 0;
-        const oldDislikeCount = parseInt(dislikeCountEl.textContent) || 0;
-        const oldVote = currentVote;
-
-        // 计算新值
-        let newLikeCount = oldLikeCount;
-        let newDislikeCount = oldDislikeCount;
-        let newVote = null;
+        let oldLikes = parseInt(likeCountEl.textContent) || 0;
+        let oldDislikes = parseInt(dislikeCountEl.textContent) || 0;
+        let newLikes = oldLikes;
+        let newDislikes = oldDislikes;
+        let newVoteType = null;
 
         if (type === 'like') {
             if (currentVote === 'like') {
-                newLikeCount = oldLikeCount - 1;
-                newVote = null;
+                // 取消点赞
+                newLikes = oldLikes - 1;
+                newVoteType = null;
+                likeBtn.classList.remove('liked');
             } else {
-                newLikeCount = oldLikeCount + 1;
+                // 点赞（可能从dislike切换）
+                newLikes = oldLikes + 1;
+                likeBtn.classList.add('liked');
                 if (currentVote === 'dislike') {
-                    newDislikeCount = oldDislikeCount - 1;
+                    newDislikes = oldDislikes - 1;
+                    dislikeBtn.classList.remove('disliked');
                 }
-                newVote = 'like';
+                newVoteType = 'like';
             }
         } else {
             if (currentVote === 'dislike') {
-                newDislikeCount = oldDislikeCount - 1;
-                newVote = null;
+                // 取消点灭
+                newDislikes = oldDislikes - 1;
+                newVoteType = null;
+                dislikeBtn.classList.remove('disliked');
             } else {
-                newDislikeCount = oldDislikeCount + 1;
+                // 点灭（可能从like切换）
+                newDislikes = oldDislikes + 1;
+                dislikeBtn.classList.add('disliked');
                 if (currentVote === 'like') {
-                    newLikeCount = oldLikeCount - 1;
+                    newLikes = oldLikes - 1;
+                    likeBtn.classList.remove('liked');
                 }
-                newVote = 'dislike';
+                newVoteType = 'dislike';
             }
         }
 
-        // 乐观更新 UI
-        likeCountEl.textContent = newLikeCount;
-        dislikeCountEl.textContent = newDislikeCount;
-        likeBtn.className = 'vote-btn' + (newVote === 'like' ? ' like-active' : '');
-        dislikeBtn.className = 'vote-btn' + (newVote === 'dislike' ? ' dislike-active' : '');
-        userVotes[replyId] = newVote;
+        // 乐观更新 DOM
+        likeCountEl.textContent = newLikes;
+        dislikeCountEl.textContent = newDislikes;
+        userVotes[replyId] = newVoteType;
 
-        // 更新缓存数据
-        if (replyData[replyId]) {
-            replyData[replyId].likes = newLikeCount;
-            replyData[replyId].dislikes = newDislikeCount;
-        }
+        // 更新本地缓存
+        reply.likes = newLikes;
+        reply.dislikes = newDislikes;
 
-        // 写库
         try {
-            if (oldVote) {
+            if (currentVote) {
+                // 删除旧投票
                 await client.from('reply_votes')
-                    .delete()
-                    .eq('reply_id', replyId)
-                    .eq('user_id', currentUser.id);
+                    .delete().eq('reply_id', replyId).eq('user_id', currentUser.id);
             }
 
-            if (newVote) {
+            if (newVoteType) {
+                // 插入新投票
                 await client.from('reply_votes').insert({
                     reply_id: replyId,
                     user_id: currentUser.id,
-                    vote_type: newVote
+                    vote_type: newVoteType
                 });
             }
 
+            // 更新 replies 表的计数
             await client.from('replies').update({
-                likes: newLikeCount,
-                dislikes: newDislikeCount
+                likes: newLikes,
+                dislikes: newDislikes
             }).eq('id', replyId);
 
         } catch (err) {
             // 回滚
-            likeCountEl.textContent = oldLikeCount;
-            dislikeCountEl.textContent = oldDislikeCount;
-            likeBtn.className = 'vote-btn' + (oldVote === 'like' ? ' like-active' : '');
-            dislikeBtn.className = 'vote-btn' + (oldVote === 'dislike' ? ' dislike-active' : '');
-            userVotes[replyId] = oldVote;
-            if (replyData[replyId]) {
-                replyData[replyId].likes = oldLikeCount;
-                replyData[replyId].dislikes = oldDislikeCount;
-            }
-            alert('操作失败，请重试');
+            likeCountEl.textContent = oldLikes;
+            dislikeCountEl.textContent = oldDislikes;
+            userVotes[replyId] = currentVote;
+            reply.likes = oldLikes;
+            reply.dislikes = oldDislikes;
+
+            if (currentVote === 'like') likeBtn.classList.add('liked');
+            else likeBtn.classList.remove('liked');
+            if (currentVote === 'dislike') dislikeBtn.classList.add('disliked');
+            else dislikeBtn.classList.remove('disliked');
+
+            alert('投票失败，请重试');
         }
 
         votingLocks[replyId] = false;
     }
 
-    // ===== 底部回复框（顶级评论）=====
+    // ========== 底部主回复框 ==========
+
     async function submitReply() {
         if (cooldownActive) return;
 
@@ -611,10 +658,7 @@
                 country_code: userCountry,
                 content: content,
                 author_name: username,
-                author_avatar: avatar,
-                likes: 0,
-                dislikes: 0,
-                parent_id: null
+                author_avatar: avatar
             });
 
             if (error) throw error;
