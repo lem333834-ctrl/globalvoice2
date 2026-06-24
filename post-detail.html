@@ -67,6 +67,11 @@
         .inline-reply-submit { padding: 5px 14px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .inline-reply-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .children-toggle { display: flex; align-items: center; gap: 8px; padding: 6px 16px 6px 60px; cursor: pointer; color: #6b7280; font-size: 13px; transition: color 0.12s; margin-bottom: 4px; }
+        .children-toggle:hover { color: #2563eb; }
+        .children-toggle .toggle-line { width: 16px; height: 1px; background: #d1d5db; }
+        .children-toggle .toggle-text { font-weight: 500; }
+
         .empty-replies { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
         .loading { text-align: center; padding: 30px; color: #9ca3af; font-size: 14px; }
 
@@ -216,7 +221,6 @@
         const top5Ids = new Set(top5.map(r => r.id));
 
         // 找出热门区需要显示的根父评论
-        // （自己在 top5，或其子回复在 top5）
         const hotParentIds = new Set();
         top5.forEach(r => {
             const rootId = r.parent_id || r.id;
@@ -243,33 +247,28 @@
                 const parentIsHot = top5Ids.has(parent.id);
                 const hasHotChild = children.some(c => top5Ids.has(c.id));
 
-                // 子回复按点赞排序（热门优先）
-                const sortedChildren = [...children].sort((a, b) => {
-                    const likeDiff = (b.likes || 0) - (a.likes || 0);
-                    if (likeDiff !== 0) return likeDiff;
-                    return new Date(b.created_at) - new Date(a.created_at);
-                });
+                // 子回复按时间从旧到新排序
+                const sortedChildren = [...children].sort((a, b) =>
+                    new Date(a.created_at) - new Date(b.created_at));
 
                 if (parentIsHot) {
                     // 父评论本身是热门 → 完整显示 + 热门标签
                     hotShownIds.add(parent.id);
                     html += renderReplyCard(parent, true, false, false);
-                    // 子回复缩进显示
-                    sortedChildren.forEach(child => {
-                        hotShownIds.add(child.id);
-                        html += renderReplyCard(child, top5Ids.has(child.id), true, false);
-                    });
+                    // 子回复：如果有热门子回复则自动展开，否则收起
+                    if (sortedChildren.length > 0) {
+                        html += renderChildrenBlock(parent.id, sortedChildren, top5Ids, hasHotChild);
+                        sortedChildren.forEach(c => hotShownIds.add(c.id));
+                    }
                 } else if (hasHotChild) {
                     // 父评论仅作为上下文 → 缩进 + 淡化显示
                     hotShownIds.add(parent.id);
                     html += renderReplyCard(parent, false, true, true);
-                    // 子回复：热门的完整显示，非热门的缩进显示
-                    sortedChildren.forEach(child => {
-                        hotShownIds.add(child.id);
-                        const childIsHot = top5Ids.has(child.id);
-                        // 热门子回复不缩进（完整显示），非热门子回复缩进
-                        html += renderReplyCard(child, childIsHot, !childIsHot, false);
-                    });
+                    // 有热门子回复 → 自动展开
+                    if (sortedChildren.length > 0) {
+                        html += renderChildrenBlock(parent.id, sortedChildren, top5Ids, true);
+                        sortedChildren.forEach(c => hotShownIds.add(c.id));
+                    }
                 }
             });
         }
@@ -283,17 +282,61 @@
             html += `<div class="sort-divider"><span class="sort-icon">🕒</span><span class="sort-text">最新回复</span><span class="sort-line"></span></div>`;
             restTopLevel.forEach(r => {
                 html += renderReplyCard(r, false, false, false);
-                if (childrenMap[r.id]) {
+                if (childrenMap[r.id] && childrenMap[r.id].length > 0) {
+                    // 最新区子回复按时间从旧到新排序，默认收起
                     const sortedChildren = [...childrenMap[r.id]].sort((a, b) =>
-                        new Date(b.created_at) - new Date(a.created_at));
-                    sortedChildren.forEach(child => {
-                        html += renderReplyCard(child, false, true, false);
-                    });
+                        new Date(a.created_at) - new Date(b.created_at));
+                    html += renderChildrenBlock(r.id, sortedChildren, top5Ids, false);
                 }
             });
         }
 
         list.innerHTML = html;
+    }
+
+    // 渲染子回复区块（带收起/展开切换）
+    function renderChildrenBlock(parentId, children, top5Ids, autoExpand) {
+        const childCount = children.length;
+        if (childCount === 0) return '';
+
+        const containerDisplay = autoExpand ? 'block' : 'none';
+        const toggleDisplay = autoExpand ? 'none' : 'flex';
+        const toggleText = `查看${childCount}条回复`;
+
+        let html = '';
+
+        // 展开/收起按钮（自动展开时隐藏）
+        html += `<div class="children-toggle" id="children-toggle-${parentId}" onclick="toggleChildren('${parentId}')" style="display:${toggleDisplay};">
+            <span class="toggle-line"></span>
+            <span class="toggle-text">${toggleText}</span>
+        </div>`;
+
+        // 子回复容器
+        html += `<div id="children-container-${parentId}" style="display:${containerDisplay};">`;
+        children.forEach(child => {
+            html += renderReplyCard(child, top5Ids.has(child.id), true, false);
+        });
+        html += `</div>`;
+
+        return html;
+    }
+
+    // 切换子回复展开/收起
+    function toggleChildren(parentId) {
+        const container = document.getElementById(`children-container-${parentId}`);
+        const toggle = document.getElementById(`children-toggle-${parentId}`);
+        if (!container || !toggle) return;
+
+        const toggleText = toggle.querySelector('.toggle-text');
+
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            toggleText.textContent = '收起回复';
+        } else {
+            container.style.display = 'none';
+            const count = (childrenMap[parentId] || []).length;
+            toggleText.textContent = `查看${count}条回复`;
+        }
     }
 
     function renderReplyCard(r, isHot, isIndented, isContext) {
@@ -442,11 +485,9 @@
 
         if (type === 'like') {
             if (currentVote === 'like') {
-                // 取消赞
                 newLikeCount = oldLikeCount - 1;
                 newVote = null;
             } else {
-                // 切换到赞
                 newLikeCount = oldLikeCount + 1;
                 if (currentVote === 'dislike') {
                     newDislikeCount = oldDislikeCount - 1;
@@ -455,11 +496,9 @@
             }
         } else {
             if (currentVote === 'dislike') {
-                // 取消踩
                 newDislikeCount = oldDislikeCount - 1;
                 newVote = null;
             } else {
-                // 切换到踩
                 newDislikeCount = oldDislikeCount + 1;
                 if (currentVote === 'like') {
                     newLikeCount = oldLikeCount - 1;
@@ -484,7 +523,6 @@
         // 写库
         try {
             if (oldVote) {
-                // 已有投票 → 先删再插（切换或取消）
                 await client.from('reply_votes')
                     .delete()
                     .eq('reply_id', replyId)
@@ -499,7 +537,6 @@
                 });
             }
 
-            // 更新 replies 表的计数
             await client.from('replies').update({
                 likes: newLikeCount,
                 dislikes: newDislikeCount
