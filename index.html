@@ -191,20 +191,31 @@
             const { data: { session } } = await client.auth.getSession();
             if (!session) return;
 
-            const { count } = await client.from('notifications')
+            const { count, error } = await client.from('notifications')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', session.user.id)
                 .eq('is_read', false);
 
+            if (error) {
+                console.error('[未读角标] 查询失败:', error.message);
+                return;
+            }
+
+            console.log('[未读角标] 当前未读数:', count, 'user:', session.user.id);
+
             const badge = document.getElementById('unreadBadge');
+            if (!badge) {
+                console.error('[未读角标] 找不到 #unreadBadge 元素');
+                return;
+            }
             if (count && count > 0) {
                 badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = '';
+                badge.style.display = 'inline-block';
             } else {
                 badge.style.display = 'none';
             }
         } catch (e) {
-            console.error('获取未读数失败:', e);
+            console.error('[未读角标] 异常:', e);
         }
     }
 
