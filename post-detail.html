@@ -187,6 +187,26 @@
         return div.innerHTML;
     }
 
+    // ========== 通知写入辅助函数 ==========
+    // fire-and-forget，失败只打日志，不影响主流程
+
+    async function insertNotification(payload) {
+        try {
+            await client.from('notifications').insert({
+                user_id: payload.user_id,
+                type: payload.type,
+                post_id: payload.post_id || null,
+                reply_id: payload.reply_id || null,
+                actor_name: payload.actor_name || '匿名用户',
+                actor_avatar: payload.actor_avatar || '🌍',
+                content: payload.content || '',
+                is_read: false
+            });
+        } catch (e) {
+            console.error('通知写入失败:', e);
+        }
+    }
+
     // ========== 帖子加载 + 帖子点赞 ==========
 
     async function loadPost() {
@@ -323,6 +343,19 @@
             // 更新本地缓存
             postData.likes = newLikes;
             myPostVote = newVote;
+
+            // ★ 通知：帖子点赞（仅新增 like 时，且不是自己的帖子）
+            if (type === 'like' && oldVote !== 'like' && postData.user_id && postData.user_id !== currentUser.id) {
+                insertNotification({
+                    user_id: postData.user_id,
+                    type: 'post_like',
+                    post_id: postId,
+                    reply_id: null,
+                    actor_name: currentUser.user_metadata?.username || '匿名用户',
+                    actor_avatar: currentUser.user_metadata?.avatar || '🌍',
+                    content: postData.title || ''
+                });
+            }
 
         } catch (err) {
             console.error('帖子投票失败:', err);
@@ -614,7 +647,7 @@
             const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
-            // 找到根父评论ID
+            // 找到父评论
             const parentReply = replyData.find(r => r.id === parentId);
             const rootParentId = parentReply && parentReply.parent_id ? parentReply.parent_id : parentId;
 
@@ -633,6 +666,19 @@
             input.value = '';
             document.getElementById('inline-reply-' + parentId).classList.remove('active');
             await loadReplies();
+
+            // ★ 通知：评论回复（通知被回复的评论作者，不是自己的评论才通知）
+            if (parentReply && parentReply.user_id && parentReply.user_id !== session.user.id) {
+                insertNotification({
+                    user_id: parentReply.user_id,
+                    type: 'comment_reply',
+                    post_id: postId,
+                    reply_id: parentId,
+                    actor_name: username,
+                    actor_avatar: avatar,
+                    content: content
+                });
+            }
 
         } catch (err) {
             alert('回复失败: ' + err.message);
@@ -721,6 +767,19 @@
                 dislikes: newDislikes
             }).eq('id', replyId);
 
+            // ★ 通知：评论点赞（仅新增 like 时，且不是自己的评论）
+            if (type === 'like' && currentVote !== 'like' && reply.user_id && reply.user_id !== currentUser.id) {
+                insertNotification({
+                    user_id: reply.user_id,
+                    type: 'comment_like',
+                    post_id: postId,
+                    reply_id: replyId,
+                    actor_name: currentUser.user_metadata?.username || '匿名用户',
+                    actor_avatar: currentUser.user_metadata?.avatar || '🌍',
+                    content: (reply.content || '').substring(0, 100)
+                });
+            }
+
         } catch (err) {
             // 回滚
             likeCountEl.textContent = oldLikes;
@@ -803,6 +862,19 @@
             btn.disabled = false;
             loadReplies();
 
+            // ★ 通知：帖子回复（通知帖子的作者，不是自己的帖子才通知）
+            if (postData && postData.user_id && postData.user_id !== session.user.id) {
+                insertNotification({
+                    user_id: postData.user_id,
+                    type: 'post_reply',
+                    post_id: postId,
+                    reply_id: null,
+                    actor_name: username,
+                    actor_avatar: avatar,
+                    content: content
+                });
+            }
+
         } catch (err) {
             alert('回复失败: ' + err.message);
             btn.disabled = false;
@@ -824,7 +896,7 @@
         await loadPost();
         await loadReplies();
 
-        const { data: post } = await client.from('posts').select('country_code').eq('id', postId).single();2
+        const { data: post } = await client.from('posts').select('country_code').eq('id', postId).single();
         isOwnPost = post && post.country_code === userCountry;
     }
 
