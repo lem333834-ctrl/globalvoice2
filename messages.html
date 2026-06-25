@@ -235,7 +235,7 @@
             const avatar = renderAvatar(g.actors[0]?.avatar);
 
             return `
-                <div class="notif-item ${unreadClass}" onclick="goToPost('${g.post_id}')">
+                <div class="notif-item ${unreadClass}" onclick="goToPost('${g.post_id}', '${g.reply_id || ''}')">
                     <div class="notif-avatar">${avatar}</div>
                     <div class="notif-body">
                         <div class="notif-title">
@@ -251,9 +251,13 @@
         }).join('');
     }
 
-    function goToPost(postId) {
+    function goToPost(postId, replyId) {
         if (postId && postId !== 'null') {
-            window.location.href = 'post-detail.html?id=' + postId;
+            let url = 'post-detail.html?id=' + postId;
+            if (replyId && replyId !== 'null') {
+                url += '&reply_id=' + replyId;
+            }
+            window.location.href = url;
         }
     }
 
