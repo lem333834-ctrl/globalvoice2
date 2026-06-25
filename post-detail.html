@@ -676,7 +676,7 @@
             const parentReply = replyData.find(r => r.id === parentId);
             const rootParentId = parentReply && parentReply.parent_id ? parentReply.parent_id : parentId;
 
-            const { error } = await client.from('replies').insert({
+            const { data: insertData, error } = await client.from('replies').insert({
                 post_id: postId,
                 user_id: session.user.id,
                 country_code: userCountry,
@@ -684,21 +684,45 @@
                 author_name: username,
                 author_avatar: avatar,
                 parent_id: rootParentId
-            });
+            }).select();
 
             if (error) throw error;
+
+            const newReplyId = insertData && insertData[0] ? insertData[0].id : null;
 
             input.value = '';
             document.getElementById('inline-reply-' + parentId).classList.remove('active');
             await loadReplies();
 
+            // 保持子回复展开，并滚动到新回复
+            if (rootParentId) {
+                const childrenContainer = document.getElementById('children-' + rootParentId);
+                const toggle = document.getElementById('toggle-' + rootParentId);
+                if (childrenContainer) {
+                    childrenContainer.style.display = 'block';
+                }
+                if (toggle) {
+                    toggle.textContent = '收起回复 ▴';
+                }
+            }
+            if (newReplyId) {
+                await new Promise(r => setTimeout(r, 200));
+                const el = document.getElementById('reply-' + newReplyId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlight');
+                    setTimeout(() => el.classList.remove('highlight'), 4000);
+                }
+            }
+
             // ★ 通知：评论回复（通知被回复的评论作者，不是自己的评论才通知）
+            console.log('[评论回复调试] parentReply.user_id:', parentReply?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
             if (parentReply && parentReply.user_id && parentReply.user_id !== session.user.id) {
                 insertNotification({
                     user_id: parentReply.user_id,
                     type: 'comment_reply',
                     post_id: postId,
-                    reply_id: parentId,
+                    reply_id: newReplyId,
                     actor_name: username,
                     actor_avatar: avatar,
                     content: content
@@ -872,30 +896,43 @@
             const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
-            const { error } = await client.from('replies').insert({
+            const { data: insertData, error } = await client.from('replies').insert({
                 post_id: postId,
                 user_id: session.user.id,
                 country_code: userCountry,
                 content: content,
                 author_name: username,
                 author_avatar: avatar
-            });
+            }).select();
 
             if (error) throw error;
+
+            const newReplyId = insertData && insertData[0] ? insertData[0].id : null;
 
             document.getElementById('replyInput').value = '';
             btn.innerText = '回复';
             btn.disabled = false;
-            loadReplies();
+            await loadReplies();
+
+            // 滚动到新回复
+            if (newReplyId) {
+                await new Promise(r => setTimeout(r, 200));
+                const el = document.getElementById('reply-' + newReplyId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('highlight');
+                    setTimeout(() => el.classList.remove('highlight'), 4000);
+                }
+            }
 
             // ★ 通知：帖子回复（通知帖子的作者，不是自己的帖子才通知）
-            console.log('[帖子回复调试] postData.user_id:', postData?.user_id, 'currentUser.id:', session.user.id);
+            console.log('[帖子回复调试] postData.user_id:', postData?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
             if (postData && postData.user_id && postData.user_id !== session.user.id) {
                 insertNotification({
                     user_id: postData.user_id,
                     type: 'post_reply',
                     post_id: postId,
-                    reply_id: null,
+                    reply_id: newReplyId,
                     actor_name: username,
                     actor_avatar: avatar,
                     content: content
