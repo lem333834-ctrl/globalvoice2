@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
+
+        .top-nav { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
+        .back-btn { font-size: 22px; cursor: pointer; color: #6b7280; }
+        .nav-title { font-size: 17px; font-weight: 700; color: #1a1a2e; flex: 1; }
+        .read-all-btn { font-size: 13px; color: #2563eb; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        .read-all-btn:active { opacity: 0.6; }
+
+        .tabs { background: white; display: flex; gap: 0; padding: 0 16px; border-bottom: 1px solid #f0f1f3; }
+        .tab { padding: 12px 20px; font-size: 14px; font-weight: 600; color: #9ca3af; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+        .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+        .notif-list { padding: 12px 16px; }
+        .notif-item { background: white; border-radius: 14px; padding: 14px; margin-bottom: 8px; border: 1px solid #f0f1f3; display: flex; gap: 12px; cursor: pointer; transition: background 0.15s; position: relative; }
+        .notif-item:active { background: #f9fafb; }
+        .notif-item.unread { background: #eff6ff; border-color: #dbeafe; }
+        .notif-avatar { width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; }
+        .notif-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .notif-body { flex: 1; min-width: 0; }
+        .notif-title { font-size: 14px; color: #1a1a2e; line-height: 1.4; margin-bottom: 4px; }
+        .notif-title .type-icon { margin-right: 4px; }
+        .notif-title .actor-name { font-weight: 700; }
+        .notif-content { font-size: 13px; color: #6b7280; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 4px; }
+        .notif-time { font-size: 11px; color: #9ca3af; }
+        .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; flex-shrink: 0; margin-top: 6px; }
+
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+        .empty { text-align: center; padding: 60px 20px; color: #9ca3af; font-size: 14px; }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; justify-content: space-around; padding: 10px 0 20px; z-index: 50; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; position: relative; }
+        .nav-icon { font-size: 22px; color: #9ca3af; }
+        .nav-label { font-size: 10px; color: #9ca3af; }
+        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
+        .nav-badge { position: absolute; top: -4px; right: calc(50% - 20px); background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; padding: 0 4px; border: 1.5px solid white; display: none; }
+        .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <span class="back-btn" onclick="window.location.href='index.html'">←</span>
+    <span class="nav-title">消息</span>
+    <span class="read-all-btn" id="readAllBtn" onclick="markAllRead()" style="display:none;">全部已读</span>
+</div>
+
+<div class="tabs">
+    <div class="tab active" id="tabAll" onclick="switchTab('all')">全部</div>
+    <div class="tab" id="tabUnread" onclick="switchTab('unread')">未读</div>
+</div>
+
+<div id="notifList">
+    <div class="loading">加载中...</div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">发现</span>
+    </div>
+    <div class="nav-item">
+        <span class="nav-icon">🏳️</span>
+        <span class="nav-label">国家</span>
+    </div>
+    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
+    <div class="nav-item active" onclick="window.location.href='messages.html'">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">消息</span>
+        <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    let currentUser = null;
+    let allNotifications = [];
+    let aggregatedGroups = [];
+    let currentTab = 'all';
+
+    // ========== 工具函数 ==========
+
+    function timeAgo(dateStr) {
+        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+        if (diff < 172800) return '昨天';
+        return Math.floor(diff / 86400) + '天前';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderAvatar(avatar) {
+        if (avatar && avatar.startsWith('http')) {
+            return `<img src="${avatar}" alt="">`;
+        }
+        return escapeHtml(avatar || '🌍');
+    }
+
+    function getTypeIcon(type) {
+        switch (type) {
+            case 'post_like': return '❤️';
+            case 'post_reply': return '💬';
+            case 'comment_like': return '👍';
+            case 'comment_reply': return '↩️';
+            default: return '📢';
+        }
+    }
+
+    function getActionText(type) {
+        switch (type) {
+            case 'post_like': return '赞了你的帖子';
+            case 'post_reply': return '回复了你的帖子';
+            case 'comment_like': return '赞了你的评论';
+            case 'comment_reply': return '回复了你的评论';
+            default: return ' interacts with you';
+        }
+    }
+
+    // ========== 通知聚合 ==========
+    // 相同类型 + 相同目标(post_id, comment_like/comment_reply 还需 reply_id 相同)
+    // 且在30分钟内的通知合并为一条
+
+    function aggregateNotifications(notifications) {
+        if (!notifications || notifications.length === 0) return [];
+
+        const groups = [];
+        const used = new Set();
+
+        for (let i = 0; i < notifications.length; i++) {
+            if (used.has(i)) continue;
+
+            const n = notifications[i];
+            const group = {
+                type: n.type,
+                post_id: n.post_id,
+                reply_id: n.reply_id,
+                actors: [{ name: n.actor_name, avatar: n.actor_avatar }],
+                latest_created_at: n.created_at,
+                count: 1,
+                is_read: n.is_read,
+                content: n.content
+            };
+            used.add(i);
+
+            const groupStartTime = new Date(n.created_at).getTime();
+
+            for (let j = i + 1; j < notifications.length; j++) {
+                if (used.has(j)) continue;
+                const m = notifications[j];
+
+                if (m.type !== n.type) continue;
+                if (m.post_id !== n.post_id) continue;
+
+                // comment_like / comment_reply 需要同一评论
+                if (n.type === 'comment_like' || n.type === 'comment_reply') {
+                    if (m.reply_id !== n.reply_id) continue;
+                }
+
+                // 30分钟内
+                const mTime = new Date(m.created_at).getTime();
+                if (groupStartTime - mTime > 30 * 60 * 1000) continue;
+
+                group.actors.push({ name: m.actor_name, avatar: m.actor_avatar });
+                group.count++;
+                if (!m.is_read) group.is_read = false;
+                used.add(j);
+            }
+
+            groups.push(group);
+        }
+
+        return groups;
+    }
+
+    // ========== 渲染 ==========
+
+    function getGroupText(group) {
+        const firstName = group.actors[0]?.name || '匿名用户';
+        const action = getActionText(group.type);
+
+        if (group.count === 1) {
+            return `<span class="actor-name">${escapeHtml(firstName)}</span> ${action}`;
+        } else if (group.count === 2) {
+            const secondName = group.actors[1]?.name || '匿名用户';
+            return `<span class="actor-name">${escapeHtml(firstName)}、${escapeHtml(secondName)}</span> ${action}`;
+        } else {
+            return `<span class="actor-name">${escapeHtml(firstName)}</span> 等${group.count}人 ${action}`;
+        }
+    }
+
+    function renderGroups(groups) {
+        const list = document.getElementById('notifList');
+
+        if (groups.length === 0) {
+            list.innerHTML = `
+                <div class="empty">
+                    <div class="empty-icon">📭</div>
+                    <div>暂无消息</div>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = groups.map(g => {
+            const icon = getTypeIcon(g.type);
+            const text = getGroupText(g);
+            const content = g.content ? escapeHtml(g.content) : '';
+            const unreadClass = !g.is_read ? 'unread' : '';
+            const unreadDot = !g.is_read ? '<div class="unread-dot"></div>' : '';
+            const avatar = renderAvatar(g.actors[0]?.avatar);
+
+            return `
+                <div class="notif-item ${unreadClass}" onclick="goToPost('${g.post_id}')">
+                    <div class="notif-avatar">${avatar}</div>
+                    <div class="notif-body">
+                        <div class="notif-title">
+                            <span class="type-icon">${icon}</span>
+                            ${text}
+                        </div>
+                        ${content ? `<div class="notif-content">${content}</div>` : ''}
+                        <div class="notif-time">${timeAgo(g.latest_created_at)}</div>
+                    </div>
+                    ${unreadDot}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function goToPost(postId) {
+        if (postId && postId !== 'null') {
+            window.location.href = 'post-detail.html?id=' + postId;
+        }
+    }
+
+    // ========== 加载通知 ==========
+
+    async function loadNotifications() {
+        const list = document.getElementById('notifList');
+        list.innerHTML = '<div class="loading">加载中...</div>';
+
+        try {
+            const { data, error } = await client.from('notifications')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
+                .limit(100);
+
+            if (error) throw error;
+
+            allNotifications = data || [];
+            aggregatedGroups = aggregateNotifications(allNotifications);
+
+            // 显示/隐藏"全部已读"按钮
+            const hasUnread = allNotifications.some(n => !n.is_read);
+            document.getElementById('readAllBtn').style.display = hasUnread ? '' : 'none';
+
+            renderByTab();
+
+            // 如果有未读，自动标记为已读（延迟2秒，让用户看到红点）
+            if (hasUnread) {
+                setTimeout(() => markAllRead(true), 2000);
+            }
+
+        } catch (err) {
+            list.innerHTML = `<div class="empty">加载失败，请下拉刷新</div>`;
+            console.error('加载通知失败:', err);
+        }
+    }
+
+    function renderByTab() {
+        if (currentTab === 'unread') {
+            renderGroups(aggregatedGroups.filter(g => !g.is_read));
+        } else {
+            renderGroups(aggregatedGroups);
+        }
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tabAll').classList.toggle('active', tab === 'all');
+        document.getElementById('tabUnread').classList.toggle('active', tab === 'unread');
+        renderByTab();
+    }
+
+    // ========== 标记已读 ==========
+
+    async function markAllRead(silent) {
+        try {
+            const unreadIds = allNotifications.filter(n => !n.is_read).map(n => n.id);
+            if (unreadIds.length === 0) return;
+
+            // 逐条更新（Supabase JS 不支持直接用 IN 数组批量 update by id，
+            // 但可以用 .in() 过滤）
+            const { error } = await client.from('notifications')
+                .update({ is_read: true })
+                .in('id', unreadIds)
+                .eq('user_id', currentUser.id);
+
+            if (error) throw error;
+
+            // 更新本地状态
+            allNotifications.forEach(n => { n.is_read = true; });
+            aggregatedGroups.forEach(g => { g.is_read = true; });
+
+            // 重新渲染
+            renderByTab();
+            document.getElementById('readAllBtn').style.display = 'none';
+            document.getElementById('unreadBadge').style.display = 'none';
+
+            if (!silent) {
+                // 可以加个 toast 提示
+            }
+
+        } catch (err) {
+            console.error('标记已读失败:', err);
+        }
+    }
+
+    // ========== 未读角标 ==========
+
+    async function loadUnreadBadge() {
+        try {
+            const { count } = await client.from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false);
+
+            const badge = document.getElementById('unreadBadge');
+            if (count && count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = '';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('获取未读数失败:', e);
+        }
+    }
+
+    // ========== 初始化 ==========
+
+    async function init() {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+        currentUser = session.user;
+
+        await loadUnreadBadge();
+        await loadNotifications();
+    }
+
+    init();
+</script>
+</body>
+</html>
