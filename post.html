@@ -24,6 +24,19 @@
         .success-msg { color: #16a34a; font-size: 13px; margin-top: 12px; text-align: center; }
         .tip { background: #f8f9fb; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
         .tip strong { color: #374151; }
+
+        /* ===== 图片上传相关 ===== */
+        .image-upload-area { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        .image-slot { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; }
+        .image-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .image-slot .remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .add-image-btn { width: 100px; height: 100px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: #9ca3af; transition: border-color 0.2s, color 0.2s; background: #fafafa; flex-
+shrink: 0; }
+        .add-image-btn:active { border-color: #2563eb; color: #2563eb; }
+        .add-image-btn .plus { font-size: 28px; line-height: 1; }
+        .add-image-btn .text { font-size: 11px; }
+        .image-hint { font-size: 11px; color: #9ca3af; margin-top: 8px; }
+        .upload-progress { font-size: 12px; color: #2563eb; margin-top: 8px; display: none; }
     </style>
 </head>
 <body>
@@ -51,6 +64,19 @@
             <div class="char-count"><span id="contentCount">0</span> 字</div>
         </div>
 
+        <div class="form-group">
+            <label>添加图片（可选，最多3张）</label>
+            <div class="image-upload-area" id="imageArea">
+                <div class="add-image-btn" id="addImageBtn" onclick="document.getElementById('imageInput').click()">
+                    <span class="plus">+</span>
+                    <span class="text">添加图片</span>
+                </div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+            <div class="image-hint">支持 JPG / PNG，单张最大 5MB，发帖前会自动压缩</div>
+            <div class="upload-progress" id="uploadProgress"></div>
+        </div>
+
         <div class="error-msg" id="errorMsg"></div>
         <div class="success-msg" id="successMsg"></div>
 
@@ -72,6 +98,9 @@
 
     let userCountry = null;
     let currentUser = null;
+    let selectedImages = []; // 待上传的图片文件（已压缩）
+    const MAX_IMAGES = 3;
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     // 页面加载时检查登录状态
     async function init() {
@@ -82,7 +111,6 @@
         }
 
         currentUser = session.user;
-        // 从用户元数据里拿国家
         userCountry = currentUser.user_metadata?.country_code || 'CN';
         const badge = document.getElementById('countryBadge');
         badge.innerText = '📍 发帖板块：' + (countryMap[userCountry] || userCountry);
@@ -95,6 +123,141 @@
     document.getElementById('content').addEventListener('input', function() {
         document.getElementById('contentCount').innerText = this.value.length;
     });
+
+    // ========== 图片选择与预览 ==========
+
+    document.getElementById('imageInput').addEventListener('change', async function(e) {
+        const files = Array.from(e.target.files);
+        e.target.value = ''; // 清空，允许重复选同一文件
+
+        for (const file of files) {
+            if (selectedImages.length >= MAX_IMAGES) {
+                document.getElementById('errorMsg').innerText = `最多只能上传${MAX_IMAGES}张图片`;
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                break;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                document.getElementById('errorMsg').innerText = '只能选择图片文件';
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                continue;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                document.getElementById('errorMsg').innerText = `${file.name} 超过5MB限制`;
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                continue;
+            }
+
+            // 压缩图片
+            const compressed = await compressImage(file);
+            selectedImages.push(compressed);
+            renderImagePreviews();
+        }
+    });
+
+    // 客户端图片压缩（canvas 方案）
+    // 最大宽度 1200px，JPEG quality 0.8
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const MAX_WIDTH = 1200;
+                    let w = img.width;
+                    let h = img.height;
+
+                    if (w > MAX_WIDTH) {
+                        h = Math.round(h * MAX_WIDTH / w);
+                        w = MAX_WIDTH;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    canvas.toBlob(function(blob) {
+                        // 保留原始文件名后缀
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        const name = 'img_' + Date.now() + '.' + (ext === 'png' ? 'png' : 'jpg');
+                        resolve(new File([blob], name, { type: blob.type }));
+                    }, file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderImagePreviews() {
+        const area = document.getElementById('imageArea');
+        let html = '';
+
+        selectedImages.forEach((img, idx) => {
+            const url = URL.createObjectURL(img);
+            html += `
+                <div class="image-slot">
+                    <img src="${url}" alt="">
+                    <button class="remove-btn" onclick="removeImage(${idx})">✕</button>
+                </div>
+            `;
+        });
+
+        if (selectedImages.length < MAX_IMAGES) {
+            html += `
+                <div class="add-image-btn" onclick="document.getElementById('imageInput').click()">
+                    <span class="plus">+</span>
+                    <span class="text">添加图片</span>
+                </div>
+            `;
+        }
+
+        area.innerHTML = html;
+    }
+
+    function removeImage(idx) {
+        selectedImages.splice(idx, 1);
+        renderImagePreviews();
+    }
+
+    // ========== 上传图片到 Supabase Storage ==========
+
+    async function uploadImages(userId) {
+        if (selectedImages.length === 0) return [];
+
+        const progressEl = document.getElementById('uploadProgress');
+        progressEl.style.display = 'block';
+        const urls = [];
+
+        for (let i = 0; i < selectedImages.length; i++) {
+            const file = selectedImages[i];
+            const ext = file.name.split('.').pop();
+            const filePath = `${userId}/${Date.now()}_${i}.${ext}`;
+
+            progressEl.innerText = `上传图片 ${i + 1}/${selectedImages.length}...`;
+
+            const { data, error } = await client.storage
+                .from('post-images')
+                .upload(filePath, file, { cacheControl: '3600' });
+
+            if (error) throw error;
+
+            // 获取公开 URL
+            const { data: urlData } = client.storage
+                .from('post-images')
+                .getPublicUrl(filePath);
+
+            urls.push(urlData.publicUrl);
+        }
+
+        progressEl.style.display = 'none';
+        return urls;
+    }
+
+    // ========== 发帖 ==========
 
     async function handlePost() {
         const btn = document.getElementById('submitBtn');
@@ -117,17 +280,22 @@
             const { data: { session } } = await client.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
 
-            // 从用户元数据中获取用户名和头像
+            const userId = session.user.id;
             const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
+            // 先上传图片（如果有）
+            const imageUrls = await uploadImages(userId);
+
+            // 再写入帖子
             const { error } = await client.from('posts').insert({
-                user_id: session.user.id,
+                user_id: userId,
                 country_code: userCountry,
                 title: title,
                 content: content,
                 author_name: username,
-                author_avatar: avatar
+                author_avatar: avatar,
+                image_urls: imageUrls
             });
 
             if (error) throw error;
@@ -143,6 +311,7 @@
             errBox.innerText = '发布失败: ' + (error.message || '请稍后重试');
             btn.disabled = false;
             btn.innerText = '发布到全球';
+            document.getElementById('uploadProgress').style.display = 'none';
         }
     }
 
