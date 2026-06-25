@@ -44,7 +44,7 @@
         .nav-icon { font-size: 22px; color: #9ca3af; }
         .nav-label { font-size: 10px; color: #9ca3af; }
         .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
-        .nav-badge { position: absolute; top: -4px; right: calc(50% - 20px); background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; padding: 0 4px; border: 1.5px solid white; display: none; }
+        .nav-badge { position: absolute; top: 2px; right: 0px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; padding: 0 4px; border: 1.5px solid white; display: none; z-index: 10; }
         .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
     </style>
 </head>
@@ -217,6 +217,8 @@
         document.getElementById('userBadge').innerText = avatar + ' ' + username;
         loadPosts('');
         loadUnreadBadge();
+        // 每60秒刷新一次未读数
+        setInterval(loadUnreadBadge, 60000);
     }
 
     init();
