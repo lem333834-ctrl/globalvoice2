@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国家 - 全球声音</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
+
+        .top-nav { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
+        .back-btn { font-size: 22px; cursor: pointer; color: #6b7280; }
+        .nav-title { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+
+        /* 我的归属国卡片 */
+        .my-country-card { background: white; margin: 16px; border-radius: 16px; border: 1px solid #f0f1f3; overflow: hidden; }
+        .my-country-header { background: linear-gradient(135deg, #2563eb, #7c3aed); padding: 20px; color: white; }
+        .my-country-label { font-size: 12px; opacity: 0.8; margin-bottom: 6px; letter-spacing: 1px; }
+        .my-country-name { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .my-country-flag { font-size: 30px; }
+        .my-country-stats { padding: 16px 20px; display: flex; gap: 24px; }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-num { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+        .stat-label { font-size: 12px; color: #9ca3af; }
+
+        /* 国家列表 */
+        .list-header { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 20px; display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+        .list-header::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+        .country-list { padding: 0 16px; }
+        .country-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 10px; border: 1px solid #f0f1f3; cursor: pointer; transition: box-shadow 0.2s; display: flex; align-items: center; gap: 14px; }
+        .country-card:active { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .country-flag { font-size: 32px; flex-shrink: 0; width: 44px; text-align: center; }
+        .country-info { flex: 1; min-width: 0; }
+        .country-name { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .country-meta { font-size: 12px; color: #9ca3af; display: flex; gap: 12px; }
+        .country-meta span { display: flex; align-items: center; gap: 3px; }
+        .country-hot { font-size: 12px; color: #6b7280; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .country-hot b { color: #f59e0b; }
+        .country-arrow { font-size: 18px; color: #d1d5db; flex-shrink: 0; }
+
+        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+        .empty { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
+
+        /* 底部导航 */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; align-items: center; justify-content: space-around; padding: 8px 0 12px; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; position: relative; }
+        .nav-icon { font-size: 22px; color: #9ca3af; }
+        .nav-label { font-size: 10px; color: #9ca3af; }
+        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
+        .nav-badge { position: absolute; top: 2px; right: 0px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; padding: 0 4px; border: 1.5px solid white; display: none; z-index: 10; }
+        .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <span class="back-btn" onclick="window.location.href='index.html'">←</span>
+    <span class="nav-title">国家</span>
+</div>
+
+<!-- 我的归属国 -->
+<div id="myCountrySection"><div class="loading">加载中...</div></div>
+
+<!-- 所有国家列表 -->
+<div class="list-header">🌍 所有国家</div>
+<div id="countryList" class="country-list"><div class="loading">加载中...</div></div>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">发现</span>
+    </div>
+    <div class="nav-item active">
+        <span class="nav-icon">🏳️</span>
+        <span class="nav-label">国家</span>
+    </div>
+    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
+    <div class="nav-item" onclick="window.location.href='messages.html'">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">消息</span>
+        <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const { createClient } = supabase;
+    const client = createClient(
+        'https://rkgwaucoldxpezwgjuoo.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
+    );
+
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
+    const nameMap = { 'CN': '中国', 'US': '美国', 'JP': '日本', 'DE': '德国', 'FR': '法国', 'KR': '韩国', 'IN': '印度' };
+
+    let currentUser = null;
+
+    function timeAgo(dateStr) {
+        if (!dateStr) return '';
+        const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
+    }
+
+    // ========== 加载我的归属国 ==========
+
+    async function loadMyCountry() {
+        const userCountry = currentUser.user_metadata?.country_code || 'CN';
+        const flag = flagMap[userCountry] || '🌍';
+        const name = nameMap[userCountry] || userCountry;
+
+        // 查该国家总发帖数
+        const { count: totalCount } = await client.from('posts')
+            .select('*', { count: 'exact', head: true })
+            .eq('country_code', userCountry);
+
+        // 查该国家24小时发帖数
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { count: dayCount } = await client.from('posts')
+            .select('*', { count: 'exact', head: true })
+            .eq('country_code', userCountry)
+            .gte('created_at', oneDayAgo);
+
+        const section = document.getElementById('myCountrySection');
+        section.innerHTML = `
+            <div class="my-country-card">
+                <div class="my-country-header">
+                    <div class="my-country-label">我的归属国</div>
+                    <div class="my-country-name">
+                        <span class="my-country-flag">${flag}</span>
+                        ${name}
+                    </div>
+                </div>
+                <div class="my-country-stats">
+                    <div class="stat-item">
+                        <div class="stat-num">${totalCount || 0}</div>
+                        <div class="stat-label">总帖数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-num">${dayCount || 0}</div>
+                        <div class="stat-label">24小时新增</div>
+                    </div>
+                    <div class="stat-item" onclick="goToCountry('${userCountry}')" style="cursor:pointer;">
+                        <div class="stat-num" style="color:#2563eb;">查看 →</div>
+                        <div class="stat-label">进入该国</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========== 加载所有国家列表 ==========
+
+    async function loadCountryList() {
+        const list = document.getElementById('countryList');
+        list.innerHTML = '<div class="loading">加载中...</div>';
+
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+        // 拉取24小时内的帖子（用于统计24h发帖数和最热帖）
+        const { data: recentPosts, error } = await client.from('posts')
+            .select('id, title, country_code, likes, created_at')
+            .gte('created_at', oneDayAgo)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            list.innerHTML = '<div class="empty">加载失败，请刷新重试</div>';
+            return;
+        }
+
+        // 拉取所有帖子的总计数（按国家）
+        const { data: allPosts } = await client.from('posts')
+            .select('country_code')
+            .order('created_at', { ascending: false });
+
+        // 按国家聚合
+        const countryStats = {};
+        const countryCodes = Object.keys(countryMap);
+
+        // 初始化所有已知国家
+        countryCodes.forEach(code => {
+            countryStats[code] = {
+                code,
+                dayCount: 0,
+                totalCount: 0,
+                hottestPost: null,
+                hottestScore: -1
+            };
+        });
+
+        // 统计总帖数
+        if (allPosts) {
+            allPosts.forEach(p => {
+                if (!countryStats[p.country_code]) {
+                    countryStats[p.country_code] = {
+                        code: p.country_code,
+                        dayCount: 0,
+                        totalCount: 0,
+                        hottestPost: null,
+                        hottestScore: -1
+                    };
+                }
+                countryStats[p.country_code].totalCount++;
+            });
+        }
+
+        // 统计24小时数据 + 找最热帖
+        if (recentPosts) {
+            recentPosts.forEach(p => {
+                if (!countryStats[p.country_code]) {
+                    countryStats[p.country_code] = {
+                        code: p.country_code,
+                        dayCount: 0,
+                        totalCount: 0,
+                        hottestPost: null,
+                        hottestScore: -1
+                    };
+                }
+                const s = countryStats[p.country_code];
+                s.dayCount++;
+                // 最热 = 点赞数最多
+                const score = (p.likes || 0);
+                if (score > s.hottestScore) {
+                    s.hottestScore = score;
+                    s.hottestPost = p;
+                }
+            });
+        }
+
+        // 按24小时发帖数降序排列
+        const sorted = Object.values(countryStats)
+            .filter(s => s.totalCount > 0)  // 只显示有帖子的国家
+            .sort((a, b) => b.dayCount - a.dayCount || b.totalCount - a.totalCount);
+
+        if (sorted.length === 0) {
+            list.innerHTML = '<div class="empty">还没有帖子，来发第一条吧 🌍</div>';
+            return;
+        }
+
+        list.innerHTML = sorted.map(s => {
+            const flag = flagMap[s.code] || '🌍';
+            const name = nameMap[s.code] || s.code;
+            const hotTitle = s.hottestPost ? s.hottestPost.title : '';
+            const hotLikes = s.hottestPost ? (s.hottestPost.likes || 0) : 0;
+
+            return `
+                <div class="country-card" onclick="goToCountry('${s.code}')">
+                    <div class="country-flag">${flag}</div>
+                    <div class="country-info">
+                        <div class="country-name">${name}</div>
+                        <div class="country-meta">
+                            <span>📊 ${s.totalCount} 总帖</span>
+                            <span>🔥 ${s.dayCount} 条/24h</span>
+                        </div>
+                        ${hotTitle ? `<div class="country-hot">🔥 最热：<b>${escapeHtml(hotTitle)}</b> (${hotLikes}赞)</div>` : ''}
+                    </div>
+                    <div class="country-arrow">›</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function goToCountry(code) {
+        window.location.href = 'index.html?country=' + code;
+    }
+
+    // ========== 未读角标 ==========
+
+    async function loadUnreadBadge() {
+        try {
+            const { count } = await client.from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false);
+
+            const badge = document.getElementById('unreadBadge');
+            if (count && count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('[未读角标] 异常:', e);
+        }
+    }
+
+    // ========== 初始化 ==========
+
+    async function init() {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) { window.location.href = 'login.html'; return; }
+        currentUser = session.user;
+
+        await loadMyCountry();
+        await loadCountryList();
+        loadUnreadBadge();
+    }
+
+    init();
+</script>
+</body>
+</html>
