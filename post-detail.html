@@ -102,6 +102,18 @@
         .reply-btn { padding: 12px 18px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .reply-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .cooldown-tip { font-size: 11px; color: #f59e0b; margin-top: 6px; text-align: center; display: none; }
+
+        /* 通知定位高亮动画 */
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        .reply-card.highlight, .child-reply-card.highlight {
+            animation: highlightPulse 1.2s ease-out 3;
+            border-color: #2563eb !important;
+            background: #eff6ff !important;
+        }
     </style>
 </head>
 <body>
@@ -192,7 +204,12 @@
 
     async function insertNotification(payload) {
         try {
-            await client.from('notifications').insert({
+            // 检查 user_id 是否有效
+            if (!payload.user_id) {
+                console.warn('[通知跳过] user_id 为空，无法写入通知:', payload);
+                return;
+            }
+            const { error } = await client.from('notifications').insert({
                 user_id: payload.user_id,
                 type: payload.type,
                 post_id: payload.post_id || null,
@@ -202,8 +219,13 @@
                 content: payload.content || '',
                 is_read: false
             });
+            if (error) {
+                console.error('[通知写入失败] DB错误:', error.message, payload);
+            } else {
+                console.log('[通知写入成功]', payload.type, '→ user:', payload.user_id);
+            }
         } catch (e) {
-            console.error('通知写入失败:', e);
+            console.error('[通知写入异常]', e.message, payload);
         }
     }
 
@@ -345,6 +367,7 @@
             myPostVote = newVote;
 
             // ★ 通知：帖子点赞（仅新增 like 时，且不是自己的帖子）
+            console.log('[帖子点赞调试] postData.user_id:', postData.user_id, 'currentUser.id:', currentUser.id, 'oldVote:', oldVote, 'type:', type);
             if (type === 'like' && oldVote !== 'like' && postData.user_id && postData.user_id !== currentUser.id) {
                 insertNotification({
                     user_id: postData.user_id,
@@ -355,6 +378,8 @@
                     actor_avatar: currentUser.user_metadata?.avatar || '🌍',
                     content: postData.title || ''
                 });
+            } else if (type === 'like' && oldVote !== 'like' && !postData.user_id) {
+                console.warn('[帖子点赞通知跳过] posts 表可能缺少 user_id 字段，postData:', postData);
             }
 
         } catch (err) {
@@ -768,6 +793,7 @@
             }).eq('id', replyId);
 
             // ★ 通知：评论点赞（仅新增 like 时，且不是自己的评论）
+            console.log('[评论点赞调试] reply.user_id:', reply.user_id, 'currentUser.id:', currentUser.id, 'currentVote:', currentVote, 'type:', type);
             if (type === 'like' && currentVote !== 'like' && reply.user_id && reply.user_id !== currentUser.id) {
                 insertNotification({
                     user_id: reply.user_id,
@@ -863,6 +889,7 @@
             loadReplies();
 
             // ★ 通知：帖子回复（通知帖子的作者，不是自己的帖子才通知）
+            console.log('[帖子回复调试] postData.user_id:', postData?.user_id, 'currentUser.id:', session.user.id);
             if (postData && postData.user_id && postData.user_id !== session.user.id) {
                 insertNotification({
                     user_id: postData.user_id,
@@ -873,6 +900,8 @@
                     actor_avatar: avatar,
                     content: content
                 });
+            } else if (postData && !postData.user_id) {
+                console.warn('[帖子回复通知跳过] posts 表可能缺少 user_id 字段，postData:', postData);
             }
 
         } catch (err) {
@@ -880,6 +909,36 @@
             btn.disabled = false;
             btn.innerText = '回复';
         }
+    }
+
+    // ========== 通知定位高亮 ==========
+
+    async function scrollToReply(replyId) {
+        // 等待 DOM 渲染完成
+        await new Promise(r => setTimeout(r, 200));
+
+        // 如果是子回复，先展开父评论的子回复区域
+        const reply = replyData.find(r => r.id === replyId);
+        if (reply && reply.parent_id) {
+            const childrenContainer = document.getElementById('children-' + reply.parent_id);
+            const toggle = document.getElementById('toggle-' + reply.parent_id);
+            if (childrenContainer && childrenContainer.style.display === 'none') {
+                childrenContainer.style.display = 'block';
+                if (toggle) toggle.textContent = '收起回复 ▴';
+            }
+            // 再等一帧让展开生效
+            await new Promise(r => setTimeout(r, 100));
+        }
+
+        const el = document.getElementById('reply-' + replyId);
+        if (!el) return;
+
+        // 滚动到元素位置
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // 高亮闪烁
+        el.classList.add('highlight');
+        setTimeout(() => el.classList.remove('highlight'), 4000);
     }
 
     async function init() {
@@ -893,8 +952,16 @@
         postId = params.get('id');
         if (!postId) { window.location.href = 'index.html'; return; }
 
+        // 读取 reply_id 参数（从消息页跳转过来时携带）
+        const targetReplyId = params.get('reply_id');
+
         await loadPost();
         await loadReplies();
+
+        // 如果有目标回复，滚动并高亮
+        if (targetReplyId) {
+            await scrollToReply(targetReplyId);
+        }
 
         const { data: post } = await client.from('posts').select('country_code').eq('id', postId).single();
         isOwnPost = post && post.country_code === userCountry;
