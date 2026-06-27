@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>国家 - 全球声音</title>
+    <title>Countries - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
@@ -56,34 +56,34 @@
 
 <div class="top-nav">
     <span class="back-btn" onclick="window.location.href='index.html'">←</span>
-    <span class="nav-title">国家</span>
+    <span class="nav-title">Countries</span>
 </div>
 
 <!-- 我的归属国 -->
-<div id="myCountrySection"><div class="loading">加载中...</div></div>
+<div id="myCountrySection"><div class="loading">Loading...</div></div>
 
 <!-- 所有国家列表 -->
-<div class="list-header">🌍 所有国家</div>
-<div id="countryList" class="country-list"><div class="loading">加载中...</div></div>
+<div class="list-header">🌍 All Countries</div>
+<div id="countryList" class="country-list"><div class="loading">Loading...</div></div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">发现</span>
+        <span class="nav-label">Home</span>
     </div>
     <div class="nav-item active">
         <span class="nav-icon">🏳️</span>
-        <span class="nav-label">国家</span>
+        <span class="nav-label">Countries</span>
     </div>
     <div class="post-btn" onclick="window.location.href='post.html'">+</div>
     <div class="nav-item" onclick="window.location.href='messages.html'">
         <span class="nav-icon">💬</span>
-        <span class="nav-label">消息</span>
+        <span class="nav-label">Messages</span>
         <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
     </div>
     <div class="nav-item" onclick="window.location.href='profile.html'">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">我的</span>
+        <span class="nav-label">Profile</span>
     </div>
 </div>
 
@@ -95,19 +95,19 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
 
-    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
-    const nameMap = { 'CN': '中国', 'US': '美国', 'JP': '日本', 'DE': '德国', 'FR': '法国', 'KR': '韩国', 'IN': '印度' };
+    const nameMap = { 'CN': '中国', 'US': 'America', 'JP': '日本', 'DE': 'Deutschland', 'FR': 'France', 'KR': '한국', 'IN': 'भारत' };
 
     let currentUser = null;
 
     function timeAgo(dateStr) {
         if (!dateStr) return '';
         const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-        return Math.floor(diff/86400) + '天前';
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
     }
 
     // ========== 加载我的归属国 ==========
@@ -133,7 +133,7 @@
         section.innerHTML = `
             <div class="my-country-card">
                 <div class="my-country-header">
-                    <div class="my-country-label">我的归属国</div>
+                    <div class="my-country-label">My Country</div>
                     <div class="my-country-name">
                         <span class="my-country-flag">${flag}</span>
                         ${name}
@@ -142,15 +142,15 @@
                 <div class="my-country-stats">
                     <div class="stat-item">
                         <div class="stat-num">${totalCount || 0}</div>
-                        <div class="stat-label">总帖数</div>
+                        <div class="stat-label">Total Posts</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-num">${dayCount || 0}</div>
-                        <div class="stat-label">24小时新增</div>
+                        <div class="stat-label">New (24h)</div>
                     </div>
                     <div class="stat-item" onclick="goToCountry('${userCountry}')" style="cursor:pointer;">
-                        <div class="stat-num" style="color:#2563eb;">查看 →</div>
-                        <div class="stat-label">进入该国</div>
+                        <div class="stat-num" style="color:#2563eb;">View →</div>
+                        <div class="stat-label">Enter</div>
                     </div>
                 </div>
             </div>
@@ -161,7 +161,7 @@
 
     async function loadCountryList() {
         const list = document.getElementById('countryList');
-        list.innerHTML = '<div class="loading">加载中...</div>';
+        list.innerHTML = '<div class="loading">Loading...</div>';
 
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
@@ -172,7 +172,7 @@
             .order('created_at', { ascending: false });
 
         if (error) {
-            list.innerHTML = '<div class="empty">加载失败，请刷新重试</div>';
+            list.innerHTML = '<div class="empty">Failed to load, please refresh</div>';
             return;
         }
 
@@ -241,7 +241,7 @@
             .sort((a, b) => b.dayCount - a.dayCount || b.totalCount - a.totalCount);
 
         if (sorted.length === 0) {
-            list.innerHTML = '<div class="empty">还没有帖子，来发第一条吧 🌍</div>';
+            list.innerHTML = '<div class="empty">No posts yet, be the first 🌍</div>';
             return;
         }
 
@@ -257,10 +257,10 @@
                     <div class="country-info">
                         <div class="country-name">${name}</div>
                         <div class="country-meta">
-                            <span>📊 ${s.totalCount} 总帖</span>
-                            <span>🔥 ${s.dayCount} 条/24h</span>
+                            <span>📊 ${s.totalCount} posts</span>
+                            <span>🔥 ${s.dayCount} / 24h</span>
                         </div>
-                        ${hotTitle ? `<div class="country-hot">🔥 最热：<b>${escapeHtml(hotTitle)}</b> (${hotLikes}赞)</div>` : ''}
+                        ${hotTitle ? `<div class="country-hot">🔥 Hot: <b>${escapeHtml(hotTitle)}</b> (${hotLikes} likes)</div>` : ''}
                     </div>
                     <div class="country-arrow">›</div>
                 </div>
