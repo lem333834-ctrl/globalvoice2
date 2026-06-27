@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搜索 - 全球声音</title>
+    <title>Search - Global Voice</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
@@ -140,16 +140,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
-        <input type="text" id="searchInput" placeholder="搜索帖子标题…" autocomplete="off" autofocus>
+        <input type="text" id="searchInput" placeholder="Search post titles..." autocomplete="off" autofocus>
     </div>
 </div>
 
 <div class="feed">
-    <div id="resultsInfo" class="results-info">输入关键词开始搜索</div>
+    <div id="resultsInfo" class="results-info">Type a keyword to start searching</div>
     <div id="postList">
         <div class="empty-state">
             <div class="icon">🔍</div>
-            <div class="text">输入关键词，搜索你感兴趣的帖子</div>
+            <div class="text">Type a keyword to search posts you're interested in</div>
         </div>
     </div>
 </div>
@@ -157,20 +157,20 @@
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">发现</span>
+        <span class="nav-label">Discover</span>
     </div>
     <div class="nav-item">
         <span class="nav-icon">🏳️</span>
-        <span class="nav-label">国家</span>
+        <span class="nav-label">Countries</span>
     </div>
     <div class="post-btn" onclick="window.location.href='post.html'">+</div>
     <div class="nav-item">
         <span class="nav-icon">💬</span>
-        <span class="nav-label">消息</span>
+        <span class="nav-label">Messages</span>
     </div>
     <div class="nav-item" onclick="window.location.href='profile.html'">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">我的</span>
+        <span class="nav-label">Profile</span>
     </div>
 </div>
 
@@ -182,7 +182,7 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
 
-    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本語', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
 
     const searchInput = document.getElementById('searchInput');
@@ -193,10 +193,10 @@
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-        return Math.floor(diff/86400) + '天前';
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
     }
 
     function escapeHtml(str) {
@@ -214,18 +214,18 @@
 
     async function searchPosts(keyword) {
         if (!keyword) {
-            resultsInfo.textContent = '输入关键词开始搜索';
+            resultsInfo.textContent = 'Type a keyword to start searching';
             postList.innerHTML = `
                 <div class="empty-state">
                     <div class="icon">🔍</div>
-                    <div class="text">输入关键词，搜索你感兴趣的帖子</div>
+                    <div class="text">Type a keyword to search posts you're interested in</div>
                 </div>
             `;
             return;
         }
 
-        resultsInfo.textContent = '搜索中…';
-        postList.innerHTML = '<div class="loading">加载中...</div>';
+        resultsInfo.textContent = 'Searching...';
+        postList.innerHTML = '<div class="loading">Loading...</div>';
 
         // 用 ilike 做不区分大小写的模糊匹配
         const { data, error } = await client
@@ -235,23 +235,23 @@
             .order('created_at', { ascending: false });
 
         if (error) {
-            resultsInfo.textContent = '搜索失败';
-            postList.innerHTML = `<div class="empty-state"><div class="text">搜索出错：${error.message}</div></div>`;
+            resultsInfo.textContent = 'Search failed';
+            postList.innerHTML = `<div class="empty-state"><div class="text">Search error: ${error.message}</div></div>`;
             return;
         }
 
         if (!data || data.length === 0) {
-            resultsInfo.textContent = `没有找到「${keyword}」相关的帖子`;
+            resultsInfo.textContent = `No posts found for "${keyword}"`;
             postList.innerHTML = `
                 <div class="empty-state">
                     <div class="icon">😅</div>
-                    <div class="text">没有找到标题包含「${keyword}」的帖子</div>
+                    <div class="text">No posts with "${keyword}" in the title</div>
                 </div>
             `;
             return;
         }
 
-        resultsInfo.textContent = `找到 ${data.length} 篇相关帖子`;
+        resultsInfo.textContent = `Found ${data.length} matching posts`;
         postList.innerHTML = data.map(post => `
             <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
                 <div class="post-meta">
