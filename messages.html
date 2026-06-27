@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>消息 - 全球声音</title>
+    <title>Messages - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
@@ -49,37 +49,37 @@
 
 <div class="top-nav">
     <span class="back-btn" onclick="window.location.href='index.html'">←</span>
-    <span class="nav-title">消息</span>
-    <span class="read-all-btn" id="readAllBtn" onclick="markAllRead()" style="display:none;">全部已读</span>
+    <span class="nav-title">Messages</span>
+    <span class="read-all-btn" id="readAllBtn" onclick="markAllRead()" style="display:none;">Mark all read</span>
 </div>
 
 <div class="tabs">
-    <div class="tab active" id="tabAll" onclick="switchTab('all')">全部</div>
-    <div class="tab" id="tabUnread" onclick="switchTab('unread')">未读</div>
+    <div class="tab active" id="tabAll" onclick="switchTab('all')">All</div>
+    <div class="tab" id="tabUnread" onclick="switchTab('unread')">Unread</div>
 </div>
 
 <div id="notifList">
-    <div class="loading">加载中...</div>
+    <div class="loading">Loading...</div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">发现</span>
+        <span class="nav-label">Home</span>
     </div>
     <div class="nav-item" onclick="window.location.href='country.html'">
         <span class="nav-icon">🏳️</span>
-        <span class="nav-label">国家</span>
+        <span class="nav-label">Countries</span>
     </div>
     <div class="post-btn" onclick="window.location.href='post.html'">+</div>
     <div class="nav-item active" onclick="window.location.href='messages.html'">
         <span class="nav-icon">💬</span>
-        <span class="nav-label">消息</span>
+        <span class="nav-label">Messages</span>
         <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
     </div>
     <div class="nav-item" onclick="window.location.href='profile.html'">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">我的</span>
+        <span class="nav-label">Profile</span>
     </div>
 </div>
 
@@ -100,11 +100,11 @@
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
-        if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
-        if (diff < 172800) return '昨天';
-        return Math.floor(diff / 86400) + '天前';
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        if (diff < 172800) return 'yesterday';
+        return Math.floor(diff / 86400) + 'd ago';
     }
 
     function escapeHtml(text) {
@@ -133,10 +133,10 @@
 
     function getActionText(type) {
         switch (type) {
-            case 'post_like': return '赞了你的帖子';
-            case 'post_reply': return '回复了你的帖子';
-            case 'comment_like': return '赞了你的评论';
-            case 'comment_reply': return '回复了你的评论';
+            case 'post_like': return 'liked your post';
+            case 'post_reply': return 'replied to your post';
+            case 'comment_like': return 'liked your comment';
+            case 'comment_reply': return 'replied to your comment';
             default: return ' interacts with you';
         }
     }
@@ -200,16 +200,16 @@
     // ========== 渲染 ==========
 
     function getGroupText(group) {
-        const firstName = group.actors[0]?.name || '匿名用户';
+        const firstName = group.actors[0]?.name || 'Anonymous';
         const action = getActionText(group.type);
 
         if (group.count === 1) {
             return `<span class="actor-name">${escapeHtml(firstName)}</span> ${action}`;
         } else if (group.count === 2) {
-            const secondName = group.actors[1]?.name || '匿名用户';
-            return `<span class="actor-name">${escapeHtml(firstName)}、${escapeHtml(secondName)}</span> ${action}`;
+            const secondName = group.actors[1]?.name || 'Anonymous';
+            return `<span class="actor-name">${escapeHtml(firstName)}, ${escapeHtml(secondName)}</span> ${action}`;
         } else {
-            return `<span class="actor-name">${escapeHtml(firstName)}</span> 等${group.count}人 ${action}`;
+            return `<span class="actor-name">${escapeHtml(firstName)}</span> and ${group.count} others ${action}`;
         }
     }
 
@@ -220,7 +220,7 @@
             list.innerHTML = `
                 <div class="empty">
                     <div class="empty-icon">📭</div>
-                    <div>暂无消息</div>
+                    <div>No messages</div>
                 </div>
             `;
             return;
@@ -265,7 +265,7 @@
 
     async function loadNotifications() {
         const list = document.getElementById('notifList');
-        list.innerHTML = '<div class="loading">加载中...</div>';
+        list.innerHTML = '<div class="loading">Loading...</div>';
 
         try {
             const { data, error } = await client.from('notifications')
@@ -291,7 +291,7 @@
             }
 
         } catch (err) {
-            list.innerHTML = `<div class="empty">加载失败，请下拉刷新</div>`;
+            list.innerHTML = `<div class="empty">Failed to load, pull to refresh</div>`;
             console.error('加载通知失败:', err);
         }
     }
