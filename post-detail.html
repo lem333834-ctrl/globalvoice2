@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Detail - Global Voice</title>
+    <title>帖子详情 - 全球声音</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 120px; }
@@ -129,23 +129,23 @@
 
 <div class="top-nav">
     <span class="back-btn" onclick="window.location.href='index.html'">←</span>
-    <span class="nav-title">Post Detail</span>
+    <span class="nav-title">帖子详情</span>
 </div>
 
-<div id="postDetail"><div class="loading">Loading...</div></div>
+<div id="postDetail"><div class="loading">加载中...</div></div>
 
 <div class="replies-header">
-    <div class="section-label">Global Replies</div>
+    <div class="section-label">全球回复</div>
 </div>
 
-<div id="repliesList"><div class="loading">Loading replies...</div></div>
+<div id="repliesList"><div class="loading">加载回复...</div></div>
 
 <div class="reply-box">
     <div class="reply-input-row">
-        <textarea id="replyInput" class="reply-input" placeholder="Share your cross-border perspective..." rows="1"></textarea>
-        <button class="reply-btn" id="replyBtn" onclick="submitReply()">Reply</button>
+        <textarea id="replyInput" class="reply-input" placeholder="发表你的跨国观点..." rows="1"></textarea>
+        <button class="reply-btn" id="replyBtn" onclick="submitReply()">回复</button>
     </div>
-    <div class="cooldown-tip" id="cooldownTip">⏳ Please wait 15s cooldown before sending</div>
+    <div class="cooldown-tip" id="cooldownTip">⏳ 请等待15秒冷静期后再发送</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -157,8 +157,8 @@
     );
 
     const countryMap = {
-        'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本語',
-        'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत'
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度'
     };
     const flagMap = {
         'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵',
@@ -196,10 +196,10 @@
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return 'just now';
-        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-        return Math.floor(diff/86400) + 'd ago';
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+        return Math.floor(diff/86400) + '天前';
     }
 
     function escapeHtml(text) {
@@ -215,7 +215,7 @@
         try {
             // 检查 user_id 是否有效
             if (!payload.user_id) {
-                console.warn('[Notification skipped] user_id is empty:', payload);
+                console.warn('[通知跳过] user_id 为空，无法写入通知:', payload);
                 return;
             }
             const { error } = await client.from('notifications').insert({
@@ -223,18 +223,18 @@
                 type: payload.type,
                 post_id: payload.post_id || null,
                 reply_id: payload.reply_id || null,
-                actor_name: payload.actor_name || 'Anonymous',
+                actor_name: payload.actor_name || '匿名用户',
                 actor_avatar: payload.actor_avatar || '🌍',
                 content: payload.content || '',
                 is_read: false
             });
             if (error) {
-                console.error('[Notification failed] DB error:', error.message, payload);
+                console.error('[通知写入失败] DB错误:', error.message, payload);
             } else {
-                console.log('[Notification sent]', payload.type, '→ user:', payload.user_id);
+                console.log('[通知写入成功]', payload.type, '→ user:', payload.user_id);
             }
         } catch (e) {
-            console.error('[Notification exception]', e.message, payload);
+            console.error('[通知写入异常]', e.message, payload);
         }
     }
 
@@ -243,7 +243,7 @@
     async function loadPost() {
         const { data, error } = await client.from('posts').select('*').eq('id', postId).single();
         if (error || !data) {
-            document.getElementById('postDetail').innerHTML = '<div class="loading">Post not found</div>';
+            document.getElementById('postDetail').innerHTML = '<div class="loading">帖子不存在</div>';
             return;
         }
 
@@ -265,7 +265,7 @@
         const likeActive = myPostVote === 'like' ? 'active-like' : '';
         const dislikeActive = myPostVote === 'dislike' ? 'active-dislike' : '';
 
-        const authorName = data.author_name || 'Anonymous';
+        const authorName = data.author_name || '匿名用户';
         const authorAvatar = data.author_avatar || flagMap[data.country_code] || '🌍';
 
         // 渲染帖子图片
@@ -316,6 +316,7 @@
 
     // 帖子点赞/点灭（乐观更新）
     async function votePost(type) {
+        if (!currentUser) { window.location.href = 'login.html'; return; }
         if (postVoteLock || !postData) return;
         postVoteLock = true;
 
@@ -395,24 +396,24 @@
             myPostVote = newVote;
 
             // ★ 通知：帖子点赞（仅新增 like 时，且不是自己的帖子）
-            console.log('[Post vote debug] postData.user_id:', postData.user_id, 'currentUser.id:', currentUser.id, 'oldVote:', oldVote, 'type:', type);
+            console.log('[帖子点赞调试] postData.user_id:', postData.user_id, 'currentUser.id:', currentUser.id, 'oldVote:', oldVote, 'type:', type);
             if (type === 'like' && oldVote !== 'like' && postData.user_id && postData.user_id !== currentUser.id) {
                 insertNotification({
                     user_id: postData.user_id,
                     type: 'post_like',
                     post_id: postId,
                     reply_id: null,
-                    actor_name: currentUser.user_metadata?.username || 'Anonymous',
+                    actor_name: currentUser.user_metadata?.username || '匿名用户',
                     actor_avatar: currentUser.user_metadata?.avatar || '🌍',
                     content: postData.title || ''
                 });
             } else if (type === 'like' && oldVote !== 'like' && !postData.user_id) {
-                console.warn('[Post like notification skipped] posts table may be missing user_id field, postData:', postData);
+                console.warn('[帖子点赞通知跳过] posts 表可能缺少 user_id 字段，postData:', postData);
             }
 
         } catch (err) {
-            console.error('Post vote failed:', err);
-            alert('Vote failed: ' + (err.message || err));
+            console.error('帖子投票失败:', err);
+            alert('投票失败: ' + (err.message || err));
 
             // 回滚 UI
             likeCountSpan.textContent = currentLikes;
@@ -433,16 +434,18 @@
             .select('*').eq('post_id', postId).order('created_at', { ascending: true });
         const list = document.getElementById('repliesList');
 
-        if (error) { list.innerHTML = '<div class="empty-replies">Failed to load</div>'; return; }
-        if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">No replies yet. Be the first to comment 🌍</div>'; return; }
+        if (error) { list.innerHTML = '<div class="empty-replies">加载失败</div>'; return; }
+        if (!data || data.length === 0) { list.innerHTML = '<div class="empty-replies">还没有回复，来发第一条跨国评论 🌍</div>'; return; }
 
         replyData = data;
 
-        // 加载当前用户的评论投票记录
-        const { data: votes } = await client.from('reply_votes')
-            .select('reply_id, vote_type').eq('user_id', currentUser.id);
+        // 加载当前用户的评论投票记录（游客跳过）
         userVotes = {};
-        if (votes) votes.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
+        if (currentUser) {
+            const { data: votes } = await client.from('reply_votes')
+                .select('reply_id, vote_type').eq('user_id', currentUser.id);
+            if (votes) votes.forEach(v => { userVotes[v.reply_id] = v.vote_type; });
+        }
 
         renderReplies();
     }
@@ -472,7 +475,7 @@
 
         // === 热门区 ===
         if (top5.length > 0) {
-            html += '<div class="area-title">🔥 Top Replies</div>';
+            html += '<div class="area-title">🔥 热门回复</div>';
             top5.forEach(r => {
                 if (!r.parent_id) {
                     html += renderTopReply(r, childMap, top5Ids, true);
@@ -485,7 +488,7 @@
 
         // === 最新区 ===
         if (remainingTopLevel.length > 0) {
-            html += '<div class="area-title">🕒 Latest Replies</div>';
+            html += '<div class="area-title">🕒 最新回复</div>';
             remainingTopLevel.forEach(r => {
                 html += renderTopReply(r, childMap, top5Ids, false);
             });
@@ -497,7 +500,7 @@
     // 渲染顶级评论（热门或最新区通用）
     function renderTopReply(r, childMap, top5Ids, isHot) {
         const children = (childMap[r.id] || []).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        const rName = r.author_name || 'Anonymous';
+        const rName = r.author_name || '匿名用户';
         const rAvatar = r.author_avatar || flagMap[r.country_code] || '🌍';
         const myVote = userVotes[r.id];
         const likes = r.likes || 0;
@@ -527,20 +530,20 @@
                         <span class="vote-icon">👎</span>
                         <span class="vote-count" id="dislike-count-${r.id}">${dislikes}</span>
                     </button>
-                    <button class="reply-action-btn" onclick="openInlineReply('${r.id}')">💬 Reply</button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${r.id}')">💬 回复</button>
                 </div>
                 <div class="inline-reply-box" id="inline-reply-${r.id}">
                     <div class="inline-reply-row">
-                        <textarea class="inline-reply-input" id="inline-input-${r.id}" placeholder="Reply to ${escapeHtml(rName)}..." rows="1"></textarea>
-                        <button class="inline-reply-btn" onclick="submitInlineReply('${r.id}')">Send</button>
+                        <textarea class="inline-reply-input" id="inline-input-${r.id}" placeholder="回复 ${escapeHtml(rName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${r.id}')">发送</button>
                     </div>
-                    <div class="inline-reply-hint">Enter to send · Shift+Enter for new line</div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
                 </div>
         `;
 
         // 子回复区域
         if (children.length > 0) {
-            html += `<div class="toggle-children" id="toggle-${r.id}" onclick="toggleChildren('${r.id}')">View ${children.length} replies ▾</div>`;
+            html += `<div class="toggle-children" id="toggle-${r.id}" onclick="toggleChildren('${r.id}')">查看${children.length}条回复 ▾</div>`;
             html += `<div class="children-container" id="children-${r.id}" style="display:none;">`;
             children.forEach(c => {
                 html += renderChildReply(c, top5Ids, false);
@@ -554,7 +557,7 @@
 
     // 渲染热门子回复（父评论以引用块折叠显示在上方）
     function renderHotChildReply(child, parent, top5Ids) {
-        const cName = child.author_name || 'Anonymous';
+        const cName = child.author_name || '匿名用户';
         const cAvatar = child.author_avatar || flagMap[child.country_code] || '🌍';
         const myVote = userVotes[child.id];
         const likes = child.likes || 0;
@@ -567,7 +570,7 @@
 
         // 父评论引用块（折叠状态）
         if (parent) {
-            const pName = parent.author_name || 'Anonymous';
+            const pName = parent.author_name || '匿名用户';
             html += `
                 <div class="parent-quote">
                     <div class="parent-quote-name">${escapeHtml(pName)}</div>
@@ -599,14 +602,14 @@
                         <span class="vote-icon">👎</span>
                         <span class="vote-count" id="dislike-count-${child.id}">${dislikes}</span>
                     </button>
-                    <button class="reply-action-btn" onclick="openInlineReply('${child.id}')">💬 Reply</button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${child.id}')">💬 回复</button>
                 </div>
                 <div class="inline-reply-box" id="inline-reply-${child.id}">
                     <div class="inline-reply-row">
-                        <textarea class="inline-reply-input" id="inline-input-${child.id}" placeholder="Reply to ${escapeHtml(cName)}..." rows="1"></textarea>
-                        <button class="inline-reply-btn" onclick="submitInlineReply('${child.id}')">Send</button>
+                        <textarea class="inline-reply-input" id="inline-input-${child.id}" placeholder="回复 ${escapeHtml(cName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${child.id}')">发送</button>
                     </div>
-                    <div class="inline-reply-hint">Enter to send · Shift+Enter for new line</div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
                 </div>
             </div>
         `;
@@ -615,7 +618,7 @@
 
     // 渲染子回复（在父评论下方缩进显示）
     function renderChildReply(c, top5Ids, isHotContext) {
-        const cName = c.author_name || 'Anonymous';
+        const cName = c.author_name || '匿名用户';
         const cAvatar = c.author_avatar || flagMap[c.country_code] || '🌍';
         const myVote = userVotes[c.id];
         const likes = c.likes || 0;
@@ -645,14 +648,14 @@
                         <span class="vote-icon" style="font-size:12px;">👎</span>
                         <span class="vote-count" id="dislike-count-${c.id}">${dislikes}</span>
                     </button>
-                    <button class="reply-action-btn" onclick="openInlineReply('${c.id}')" style="font-size:11px; padding:2px 6px;">💬 Reply</button>
+                    <button class="reply-action-btn" onclick="openInlineReply('${c.id}')" style="font-size:11px; padding:2px 6px;">💬 回复</button>
                 </div>
                 <div class="inline-reply-box" id="inline-reply-${c.id}">
                     <div class="inline-reply-row">
-                        <textarea class="inline-reply-input" id="inline-input-${c.id}" placeholder="Reply to ${escapeHtml(cName)}..." rows="1"></textarea>
-                        <button class="inline-reply-btn" onclick="submitInlineReply('${c.id}')">Send</button>
+                        <textarea class="inline-reply-input" id="inline-input-${c.id}" placeholder="回复 ${escapeHtml(cName)}..." rows="1"></textarea>
+                        <button class="inline-reply-btn" onclick="submitInlineReply('${c.id}')">发送</button>
                     </div>
-                    <div class="inline-reply-hint">Enter to send · Shift+Enter for new line</div>
+                    <div class="inline-reply-hint">Enter 发送 · Shift+Enter 换行</div>
                 </div>
             </div>
         `;
@@ -664,16 +667,17 @@
         const toggle = document.getElementById('toggle-' + replyId);
         if (container.style.display === 'none') {
             container.style.display = 'block';
-            toggle.textContent = 'Hide replies ▴';
+            toggle.textContent = '收起回复 ▴';
         } else {
             container.style.display = 'none';
             const childCount = replyData.filter(r => r.parent_id === replyId).length;
-            toggle.textContent = `View ${childCount} replies ▾`;
+            toggle.textContent = `查看${childCount}条回复 ▾`;
         }
     }
 
     // 内联回复
     function openInlineReply(replyId) {
+        if (!currentUser) { window.location.href = 'login.html'; return; }
         document.querySelectorAll('.inline-reply-box').forEach(el => el.classList.remove('active'));
         const box = document.getElementById('inline-reply-' + replyId);
         if (box) {
@@ -684,10 +688,11 @@
     }
 
     async function submitInlineReply(parentId) {
+        if (!currentUser) { window.location.href = 'login.html'; return; }
         const input = document.getElementById('inline-input-' + parentId);
         const content = input.value.trim();
         if (!content) return;
-        if (content.length < 5) { alert('Reply must be at least 5 characters'); return; }
+        if (content.length < 5) { alert('回复内容至少5个字'); return; }
 
         const btn = input.nextElementSibling;
         btn.disabled = true;
@@ -697,7 +702,7 @@
             const { data: { session } } = await client.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
 
-            const username = session.user.user_metadata?.username || 'Anonymous';
+            const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
             // 找到父评论
@@ -730,7 +735,7 @@
                     childrenContainer.style.display = 'block';
                 }
                 if (toggle) {
-                    toggle.textContent = 'Hide replies ▴';
+                    toggle.textContent = '收起回复 ▴';
                 }
             }
             if (newReplyId) {
@@ -744,7 +749,7 @@
             }
 
             // ★ 通知：评论回复（通知被回复的评论作者，不是自己的评论才通知）
-            console.log('[Reply debug] parentReply.user_id:', parentReply?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
+            console.log('[评论回复调试] parentReply.user_id:', parentReply?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
             if (parentReply && parentReply.user_id && parentReply.user_id !== session.user.id) {
                 insertNotification({
                     user_id: parentReply.user_id,
@@ -758,16 +763,17 @@
             }
 
         } catch (err) {
-            alert('Reply failed: ' + err.message);
+            alert('回复失败: ' + err.message);
         }
 
         btn.disabled = false;
-        btn.innerText = 'Send';
+        btn.innerText = '发送';
     }
 
     // ========== 评论投票（乐观更新，不重载列表） ==========
 
     async function handleVote(replyId, type) {
+        if (!currentUser) { window.location.href = 'login.html'; return; }
         if (votingLocks[replyId]) return;
         votingLocks[replyId] = true;
 
@@ -845,14 +851,14 @@
             }).eq('id', replyId);
 
             // ★ 通知：评论点赞（仅新增 like 时，且不是自己的评论）
-            console.log('[Comment vote debug] reply.user_id:', reply.user_id, 'currentUser.id:', currentUser.id, 'currentVote:', currentVote, 'type:', type);
+            console.log('[评论点赞调试] reply.user_id:', reply.user_id, 'currentUser.id:', currentUser.id, 'currentVote:', currentVote, 'type:', type);
             if (type === 'like' && currentVote !== 'like' && reply.user_id && reply.user_id !== currentUser.id) {
                 insertNotification({
                     user_id: reply.user_id,
                     type: 'comment_like',
                     post_id: postId,
                     reply_id: replyId,
-                    actor_name: currentUser.user_metadata?.username || 'Anonymous',
+                    actor_name: currentUser.user_metadata?.username || '匿名用户',
                     actor_avatar: currentUser.user_metadata?.avatar || '🌍',
                     content: (reply.content || '').substring(0, 100)
                 });
@@ -871,7 +877,7 @@
             if (currentVote === 'dislike') dislikeBtn.classList.add('disliked');
             else dislikeBtn.classList.remove('disliked');
 
-            alert('Vote failed, please try again');
+            alert('投票失败，请重试');
         }
 
         votingLocks[replyId] = false;
@@ -880,11 +886,12 @@
     // ========== 底部主回复框 ==========
 
     async function submitReply() {
+        if (!currentUser) { window.location.href = 'login.html'; return; }
         if (cooldownActive) return;
 
         const content = document.getElementById('replyInput').value.trim();
         if (!content) return;
-        if (content.length < 5) { alert('Reply must be at least 5 characters'); return; }
+        if (content.length < 5) { alert('回复内容至少5个字'); return; }
 
         const btn = document.getElementById('replyBtn');
 
@@ -901,7 +908,7 @@
                     clearInterval(timer);
                     cooldownActive = false;
                     btn.disabled = false;
-                    btn.innerText = 'Reply';
+                    btn.innerText = '回复';
                     document.getElementById('cooldownTip').style.display = 'none';
                     actuallySubmit(content);
                 }
@@ -915,13 +922,13 @@
     async function actuallySubmit(content) {
         const btn = document.getElementById('replyBtn');
         btn.disabled = true;
-        btn.innerText = 'Sending...';
+        btn.innerText = '发送中...';
 
         try {
             const { data: { session } } = await client.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
 
-            const username = session.user.user_metadata?.username || 'Anonymous';
+            const username = session.user.user_metadata?.username || '匿名用户';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
             const { data: insertData, error } = await client.from('replies').insert({
@@ -938,7 +945,7 @@
             const newReplyId = insertData && insertData[0] ? insertData[0].id : null;
 
             document.getElementById('replyInput').value = '';
-            btn.innerText = 'Reply';
+            btn.innerText = '回复';
             btn.disabled = false;
             await loadReplies();
 
@@ -954,7 +961,7 @@
             }
 
             // ★ 通知：帖子回复（通知帖子的作者，不是自己的帖子才通知）
-            console.log('[Post reply debug] postData.user_id:', postData?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
+            console.log('[帖子回复调试] postData.user_id:', postData?.user_id, 'currentUser.id:', session.user.id, 'newReplyId:', newReplyId);
             if (postData && postData.user_id && postData.user_id !== session.user.id) {
                 insertNotification({
                     user_id: postData.user_id,
@@ -966,13 +973,13 @@
                     content: content
                 });
             } else if (postData && !postData.user_id) {
-                console.warn('[Post reply notification skipped] posts table may be missing user_id field, postData:', postData);
+                console.warn('[帖子回复通知跳过] posts 表可能缺少 user_id 字段，postData:', postData);
             }
 
         } catch (err) {
-            alert('Reply failed: ' + err.message);
+            alert('回复失败: ' + err.message);
             btn.disabled = false;
-            btn.innerText = 'Reply';
+            btn.innerText = '回复';
         }
     }
 
@@ -989,7 +996,7 @@
             const toggle = document.getElementById('toggle-' + reply.parent_id);
             if (childrenContainer && childrenContainer.style.display === 'none') {
                 childrenContainer.style.display = 'block';
-                if (toggle) toggle.textContent = 'Hide replies ▴';
+                if (toggle) toggle.textContent = '收起回复 ▴';
             }
             // 再等一帧让展开生效
             await new Promise(r => setTimeout(r, 100));
@@ -1008,10 +1015,14 @@
 
     async function init() {
         const { data: { session } } = await client.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
-
-        currentUser = session.user;
-        userCountry = currentUser.user_metadata?.country_code || 'CN';
+        if (session) {
+            currentUser = session.user;
+            userCountry = currentUser.user_metadata?.country_code || 'CN';
+        } else {
+            // Guest mode: allow browsing, but no user context
+            currentUser = null;
+            userCountry = null;
+        }
 
         const params = new URLSearchParams(window.location.search);
         postId = params.get('id');
@@ -1029,7 +1040,7 @@
         }
 
         const { data: post } = await client.from('posts').select('country_code').eq('id', postId).single();
-        isOwnPost = post && post.country_code === userCountry;
+        isOwnPost = currentUser && post && post.country_code === userCountry;
     }
 
     init();
