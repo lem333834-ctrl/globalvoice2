@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全球声音</title>
+    <title>Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
@@ -51,46 +51,46 @@
 </head>
 <body>
 <div class="top-nav">
-    <div class="logo">🌍 全球声音</div>
+    <div class="logo">🌍 Global Voices</div>
     <div class="nav-search" onclick="window.location.href='search.html'">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
         </svg>
-        <span>搜索帖子标题…</span>
+        <span>Search post titles…</span>
     </div>
-    <div class="user-badge" id="userBadge">加载中...</div>
+    <div class="user-badge" id="userBadge">Loading...</div>
 </div>
 <div class="country-tabs">
-    <button class="tab active" onclick="filterPosts(this, '')">🌍 全部</button>
+    <button class="tab active" onclick="filterPosts(this, '')">🌍 All</button>
     <button class="tab" onclick="filterPosts(this, 'CN')">🇨🇳 中国</button>
-    <button class="tab" onclick="filterPosts(this, 'US')">🇺🇸 美国</button>
+    <button class="tab" onclick="filterPosts(this, 'US')">🇺🇸 America</button>
     <button class="tab" onclick="filterPosts(this, 'JP')">🇯🇵 日本</button>
-    <button class="tab" onclick="filterPosts(this, 'DE')">🇩🇪 德国</button>
-    <button class="tab" onclick="filterPosts(this, 'KR')">🇰🇷 韩国</button>
-    <button class="tab" onclick="filterPosts(this, 'IN')">🇮🇳 印度</button>
+    <button class="tab" onclick="filterPosts(this, 'DE')">🇩🇪 Deutschland</button>
+    <button class="tab" onclick="filterPosts(this, 'KR')">🇰🇷 한국</button>
+    <button class="tab" onclick="filterPosts(this, 'IN')">🇮🇳 भारत</button>
 </div>
 <div class="feed">
-    <div class="section-label">🔥 热门帖子</div>
-    <div id="postList"><div class="loading">加载中...</div></div>
+    <div class="section-label">🔥 Trending Posts</div>
+    <div id="postList"><div class="loading">Loading...</div></div>
 </div>
 <div class="bottom-nav">
     <div class="nav-item active" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">发现</span>
+        <span class="nav-label">Discover</span>
     </div>
     <div class="nav-item" onclick="window.location.href='country.html'">
         <span class="nav-icon">🏳️</span>
-        <span class="nav-label">国家</span>
+        <span class="nav-label">Countries</span>
     </div>
     <div class="post-btn" onclick="window.location.href='post.html'">+</div>
     <div class="nav-item" onclick="window.location.href='messages.html'">
         <span class="nav-icon">💬</span>
-        <span class="nav-label">消息</span>
+        <span class="nav-label">Messages</span>
         <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
     </div>
     <div class="nav-item" onclick="window.location.href='profile.html'">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">我的</span>
+        <span class="nav-label">Profile</span>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -100,13 +100,13 @@
         'https://rkgwaucoldxpezwgjuoo.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
-    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
 
     // ========================
-    // 帖子排序核心逻辑
-    // 分数 = (点赞数 + 1) × 时效系数
-    // ≤3天=1.0, 3-7天=0.06, >7天=0.03
+    // Post sorting core logic
+    // Score = (likes + 1) × time factor
+    // ≤3 days=1.0, 3-7 days=0.06, >7 days=0.03
     // ========================
     function getTimeFactor(dateStr) {
         const diff = Date.now() - new Date(dateStr).getTime();
@@ -127,10 +127,10 @@
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-        return Math.floor(diff/86400) + '天前';
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
     }
 
     function renderAvatar(post) {
@@ -143,14 +143,13 @@
 
     async function loadPosts(countryFilter) {
         const list = document.getElementById('postList');
-        list.innerHTML = '<div class="loading">加载中...</div>';
+        list.innerHTML = '<div class="loading">Loading...</div>';
         let query = client.from('posts').select('*').order('created_at', { ascending: false });
         if (countryFilter) query = query.eq('country_code', countryFilter);
         const { data, error } = await query;
-        if (error) { list.innerHTML = '<div class="empty">加载失败，请刷新重试</div>'; return; }
-        if (!data || data.length === 0) { list.innerHTML = '<div class="empty">还没有帖子，来发第一条吧 🌍</div>'; return; }
+        if (error) { list.innerHTML = '<div class="empty">Failed to load. Please refresh.</div>'; return; }
+        if (!data || data.length === 0) { list.innerHTML = '<div class="empty">No posts yet. Be the first to post 🌍</div>'; return; }
 
-        // 按权重排序
         const sorted = sortPostsByScore(data);
 
         list.innerHTML = sorted.map(post => {
@@ -168,7 +167,7 @@
                 </div>
                 <div class="post-author">
                     ${renderAvatar(post)}
-                    <span class="author-name">${post.author_name || '匿名用户'}</span>
+                    <span class="author-name">${post.author_name || 'Anonymous'}</span>
                 </div>
                 <div class="post-title">${post.title}</div>
                 <div class="post-content">${post.content}</div>
@@ -189,7 +188,7 @@
         loadPosts(country);
     }
 
-    // ========== 未读消息角标 ==========
+    // ========== Unread badge ==========
 
     async function loadUnreadBadge() {
         try {
@@ -202,15 +201,15 @@
                 .eq('is_read', false);
 
             if (error) {
-                console.error('[未读角标] 查询失败:', error.message);
+                console.error('[Unread badge] Query failed:', error.message);
                 return;
             }
 
-            console.log('[未读角标] 当前未读数:', count, 'user:', session.user.id);
+            console.log('[Unread badge] Current unread:', count, 'user:', session.user.id);
 
             const badge = document.getElementById('unreadBadge');
             if (!badge) {
-                console.error('[未读角标] 找不到 #unreadBadge 元素');
+                console.error('[Unread badge] #unreadBadge element not found');
                 return;
             }
             if (count && count > 0) {
@@ -220,7 +219,7 @@
                 badge.style.display = 'none';
             }
         } catch (e) {
-            console.error('[未读角标] 异常:', e);
+            console.error('[Unread badge] Error:', e);
         }
     }
 
@@ -228,11 +227,11 @@
         const { data: { session } } = await client.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
         const user = session.user;
-        const username = user.user_metadata?.username || '未设置';
+        const username = user.user_metadata?.username || 'Not set';
         const avatar = user.user_metadata?.avatar || '🌍';
         document.getElementById('userBadge').innerText = avatar + ' ' + username;
 
-        // 检查 URL 参数，自动切换到指定国家 Tab
+        // Check URL params, auto-switch to specified country tab
         const params = new URLSearchParams(window.location.search);
         const countryParam = params.get('country');
         if (countryParam) {
@@ -257,7 +256,7 @@
         }
 
         loadUnreadBadge();
-        // 每60秒刷新一次未读数
+        // Refresh unread count every 60 seconds
         setInterval(loadUnreadBadge, 60000);
     }
 
