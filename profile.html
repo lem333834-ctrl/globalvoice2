@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人页 - 全球声音</title>
+    <title>Profile - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
@@ -68,72 +68,72 @@
 <body>
 
 <div class="top-nav">
-    <span class="nav-title">我的主页</span>
+    <span class="nav-title">My Profile</span>
 </div>
 
 <div class="profile-header">
     <div class="avatar" id="avatarEmoji">🌍</div>
-    <div class="profile-username" id="profileUsername">加载中...</div>
-    <div class="profile-email" id="profileEmail">加载中...</div>
-    <div class="country-badge" id="countryBadge">加载中...</div>
+    <div class="profile-username" id="profileUsername">Loading...</div>
+    <div class="profile-email" id="profileEmail">Loading...</div>
+    <div class="country-badge" id="countryBadge">Loading...</div>
     <br>
-    <button class="edit-profile-btn" onclick="openEditModal()">编辑资料</button>
+    <button class="edit-profile-btn" onclick="openEditModal()">Edit Profile</button>
 </div>
 
 <div class="stats-row">
     <div class="stat-item">
         <div class="stat-num" id="postCount">-</div>
-        <div class="stat-label">发帖数</div>
+        <div class="stat-label">Posts</div>
     </div>
     <div class="stat-item">
         <div class="stat-num" id="replyCount">-</div>
-        <div class="stat-label">回复数</div>
+        <div class="stat-label">Replies</div>
     </div>
     <div class="stat-item">
         <div class="stat-num" id="joinDays">-</div>
-        <div class="stat-label">加入天数</div>
+        <div class="stat-label">Days Joined</div>
     </div>
 </div>
 
 <div class="section">
-    <div class="section-label">我发布的帖子</div>
-    <div id="myPosts"><div class="loading">加载中...</div></div>
+    <div class="section-label">My Posts</div>
+    <div id="myPosts"><div class="loading">Loading...</div></div>
 </div>
 
-<button class="logout-btn" onclick="logout()">退出登录</button>
+<button class="logout-btn" onclick="logout()">Log Out</button>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">发现</span>
+        <span class="nav-label">Discover</span>
     </div>
     <div class="nav-item">
         <span class="nav-icon">🏳️</span>
-        <span class="nav-label">国家</span>
+        <span class="nav-label">Countries</span>
     </div>
     <div class="post-btn" onclick="window.location.href='post.html'">+</div>
     <div class="nav-item">
         <span class="nav-icon">💬</span>
-        <span class="nav-label">消息</span>
+        <span class="nav-label">Messages</span>
     </div>
     <div class="nav-item active">
         <span class="nav-icon">👤</span>
-        <span class="nav-label">我的</span>
+        <span class="nav-label">Profile</span>
     </div>
 </div>
 
 <div class="edit-modal" id="editModal">
     <div class="edit-modal-content">
         <div class="edit-modal-header">
-            <span class="edit-modal-title">编辑资料</span>
+            <span class="edit-modal-title">Edit Profile</span>
             <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
         </div>
         <div class="edit-modal-body">
-            <label>用户名</label>
-            <input type="text" id="editUsername" class="form-input" placeholder="给自己起个名字" maxlength="20">
-            <label>选择头像</label>
+            <label>Username</label>
+            <input type="text" id="editUsername" class="form-input" placeholder="Choose a username" maxlength="20">
+            <label>Choose Avatar</label>
             <div class="avatar-picker" id="editAvatarPicker"></div>
-            <button class="save-btn" id="saveBtn" onclick="saveProfile()">保存</button>
+            <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save</button>
         </div>
     </div>
 </div>
@@ -146,7 +146,7 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
 
-    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度' };
+    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
     const avatarList = ['🦊','🐼','🐨','🐱','🐶','🦁','🐯','🐸','🐧','🦉','🐙','🦄','🐲','🐳','🐬','🦓','🐝','🦜'];
 
@@ -155,10 +155,10 @@
 
     function timeAgo(dateStr) {
         const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return '刚刚';
-        if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-        if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-        return Math.floor(diff/86400) + '天前';
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
     }
 
     function openEditModal() {
@@ -185,20 +185,20 @@
 
     async function saveProfile() {
         const newUsername = document.getElementById('editUsername').value.trim();
-        if (!newUsername) { alert('请输入用户名'); return; }
+        if (!newUsername) { alert('Please enter a username'); return; }
 
         const btn = document.getElementById('saveBtn');
         btn.disabled = true;
-        btn.innerText = '保存中...';
+        btn.innerText = 'Saving...';
 
         const { data, error } = await client.auth.updateUser({
             data: { username: newUsername, avatar: editSelectedAvatar }
         });
 
         if (error) {
-            alert('保存失败: ' + error.message);
+            alert('Save failed: ' + error.message);
             btn.disabled = false;
-            btn.innerText = '保存';
+            btn.innerText = 'Save';
             return;
         }
 
@@ -206,7 +206,7 @@
         document.getElementById('profileUsername').innerText = newUsername;
         currentUser = data.user;
         btn.disabled = false;
-        btn.innerText = '保存';
+        btn.innerText = 'Save';
         closeEditModal();
     }
 
@@ -217,7 +217,7 @@
         const user = session.user;
         currentUser = user;
         const country = user.user_metadata?.country_code || 'CN';
-        const username = user.user_metadata?.username || '未设置用户名';
+        const username = user.user_metadata?.username || 'Not set';
         const avatar = user.user_metadata?.avatar || '🌍';
 
         document.getElementById('avatarEmoji').innerText = avatar;
@@ -237,7 +237,7 @@
         document.getElementById('postCount').innerText = posts?.length || 0;
 
         if (error || !posts || posts.length === 0) {
-            document.getElementById('myPosts').innerHTML = '<div class="empty">还没有发过帖子</div>';
+            document.getElementById('myPosts').innerHTML = '<div class="empty">No posts yet</div>';
         } else {
             document.getElementById('myPosts').innerHTML = posts.map(post => `
                 <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
