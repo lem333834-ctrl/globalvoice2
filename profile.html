@@ -3,45 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Global Voices</title>
+    <title>New Post - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { font-size: 24px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo p { font-size: 12px; color: #6b7280; margin-top: 5px; }
+        body { background: #f5f6f8; min-height: 100vh; padding: 20px; }
+        .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
+        .back-btn { font-size: 24px; cursor: pointer; color: #6b7280; }
+        .header h2 { font-size: 18px; font-weight: 700; color: #1a1a2e; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .country-badge { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
-        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; transition: border-color 0.2s; }
-        .form-input:focus { outline: none; border-color: #2563eb; }
-        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; transition: border-color 0.2s; background: #fafafa; }
+        .form-input:focus { outline: none; border-color: #2563eb; background: white; }
+        textarea.form-input { min-height: 140px; resize: vertical; line-height: 1.6; }
+        .char-count { text-align: right; font-size: 11px; color: #9ca3af; margin-top: 4px; }
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
         .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
-        .success-msg { color: #16a34a; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
-        .bottom-link { text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280; }
-        .bottom-link a { color: #2563eb; text-decoration: none; font-weight: 600; }
+        .error-msg { color: #ef4444; font-size: 13px; margin-top: 12px; text-align: center; }
+        .success-msg { color: #16a34a; font-size: 13px; margin-top: 12px; text-align: center; }
+        .tip { background: #f8f9fb; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
+        .tip strong { color: #374151; }
+
+        /* ===== Image upload ===== */
+        .image-upload-area { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+        .image-slot { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; }
+        .image-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .image-slot .remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .add-image-btn { width: 100px; height: 100px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: #9ca3af; transition: border-color 0.2s, color 0.2s; background: #fafafa; flex-
+shrink: 0; }
+        .add-image-btn:active { border-color: #2563eb; color: #2563eb; }
+        .add-image-btn .plus { font-size: 28px; line-height: 1; }
+        .add-image-btn .text { font-size: 11px; }
+        .image-hint { font-size: 11px; color: #9ca3af; margin-top: 8px; }
+        .upload-progress { font-size: 12px; color: #2563eb; margin-top: 8px; display: none; }
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="logo">
-        <h1>🌍 Global Voices</h1>
-        <p>Welcome back, the world is waiting</p>
+    <div class="header">
+        <span class="back-btn" onclick="window.location.href='index.html'">←</span>
+        <h2>New Post</h2>
     </div>
-    <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="email" class="form-input" placeholder="you@example.com">
+
+    <div class="card">
+        <div class="country-badge" id="countryBadge">🌍 Loading...</div>
+
+        <div class="tip">
+            <strong>Posting rule:</strong> You can only post in your own country's section, but users worldwide can reply to your post.
+        </div>
+
+        <div class="form-group">
+            <label>Post Title</label>
+            <input type="text" id="title" class="form-input" placeholder="Summarize your topic in one sentence" maxlength="100">
+            <div class="char-count"><span id="titleCount">0</span>/100</div>
+        </div>
+
+        <div class="form-group">
+            <label>Post Content</label>
+            <textarea id="content" class="form-input" placeholder="Share your thoughts, experiences, or questions..."></textarea>
+            <div class="char-count"><span id="contentCount">0</span> characters</div>
+        </div>
+
+        <div class="form-group">
+            <label>Add Images (optional, up to 3)</label>
+            <div class="image-upload-area" id="imageArea">
+                <div class="add-image-btn" id="addImageBtn" onclick="document.getElementById('imageInput').click()">
+                    <span class="plus">+</span>
+                    <span class="text">Add Image</span>
+                </div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+            <div class="image-hint">Supports JPG / PNG, max 5MB each, auto-compressed before posting</div>
+            <div class="upload-progress" id="uploadProgress"></div>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <button class="submit-btn" id="submitBtn" onclick="handlePost()">Post to the World</button>
     </div>
-    <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="password" class="form-input" placeholder="Enter your password">
-    </div>
-    <div class="error-msg" id="errorMsg"></div>
-    <div class="success-msg" id="successMsg"></div>
-    <button class="submit-btn" id="submitBtn" onclick="handleLogin()">Log In</button>
-    <div class="bottom-link" style="margin-top:20px;">Don't have an account? <a href="register.html">Sign up</a></div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -51,50 +91,230 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
 
-    async function handleLogin() {
+    const countryMap = {
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत'
+    };
+
+    let userCountry = null;
+    let currentUser = null;
+    let selectedImages = []; // Images to upload (compressed)
+    const MAX_IMAGES = 3;
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+    // Check login status on page load
+    async function init() {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = session.user;
+        userCountry = currentUser.user_metadata?.country_code || 'CN';
+        const badge = document.getElementById('countryBadge');
+        badge.innerText = '📍 Post section: ' + (countryMap[userCountry] || userCountry);
+    }
+
+    // Character count
+    document.getElementById('title').addEventListener('input', function() {
+        document.getElementById('titleCount').innerText = this.value.length;
+    });
+    document.getElementById('content').addEventListener('input', function() {
+        document.getElementById('contentCount').innerText = this.value.length;
+    });
+
+    // ========== Image selection & preview ==========
+
+    document.getElementById('imageInput').addEventListener('change', async function(e) {
+        const files = Array.from(e.target.files);
+        e.target.value = ''; // Clear, allow re-selecting same file
+
+        for (const file of files) {
+            if (selectedImages.length >= MAX_IMAGES) {
+                document.getElementById('errorMsg').innerText = `You can upload up to ${MAX_IMAGES} images`;
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                break;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                document.getElementById('errorMsg').innerText = 'Only image files are allowed';
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                continue;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                document.getElementById('errorMsg').innerText = `${file.name} exceeds 5MB limit`;
+                setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
+                continue;
+            }
+
+            // Compress image
+            const compressed = await compressImage(file);
+            selectedImages.push(compressed);
+            renderImagePreviews();
+        }
+    });
+
+    // Client-side image compression (canvas approach)
+    // Max width 1200px, JPEG quality 0.8
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const MAX_WIDTH = 1200;
+                    let w = img.width;
+                    let h = img.height;
+
+                    if (w > MAX_WIDTH) {
+                        h = Math.round(h * MAX_WIDTH / w);
+                        w = MAX_WIDTH;
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    canvas.toBlob(function(blob) {
+                        const ext = file.name.split('.').pop().toLowerCase();
+                        const name = 'img_' + Date.now() + '.' + (ext === 'png' ? 'png' : 'jpg');
+                        resolve(new File([blob], name, { type: blob.type }));
+                    }, file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderImagePreviews() {
+        const area = document.getElementById('imageArea');
+        let html = '';
+
+        selectedImages.forEach((img, idx) => {
+            const url = URL.createObjectURL(img);
+            html += `
+                <div class="image-slot">
+                    <img src="${url}" alt="">
+                    <button class="remove-btn" onclick="removeImage(${idx})">✕</button>
+                </div>
+            `;
+        });
+
+        if (selectedImages.length < MAX_IMAGES) {
+            html += `
+                <div class="add-image-btn" onclick="document.getElementById('imageInput').click()">
+                    <span class="plus">+</span>
+                    <span class="text">Add Image</span>
+                </div>
+            `;
+        }
+
+        area.innerHTML = html;
+    }
+
+    function removeImage(idx) {
+        selectedImages.splice(idx, 1);
+        renderImagePreviews();
+    }
+
+    // ========== Upload images to Supabase Storage ==========
+
+    async function uploadImages(userId) {
+        if (selectedImages.length === 0) return [];
+
+        const progressEl = document.getElementById('uploadProgress');
+        progressEl.style.display = 'block';
+        const urls = [];
+
+        for (let i = 0; i < selectedImages.length; i++) {
+            const file = selectedImages[i];
+            const ext = file.name.split('.').pop();
+            const filePath = `${userId}/${Date.now()}_${i}.${ext}`;
+
+            progressEl.innerText = `Uploading image ${i + 1}/${selectedImages.length}...`;
+
+            const { data, error } = await client.storage
+                .from('post-images')
+                .upload(filePath, file, { cacheControl: '3600' });
+
+            if (error) throw error;
+
+            // Get public URL
+            const { data: urlData } = client.storage
+                .from('post-images')
+                .getPublicUrl(filePath);
+
+            urls.push(urlData.publicUrl);
+        }
+
+        progressEl.style.display = 'none';
+        return urls;
+    }
+
+    // ========== Submit post ==========
+
+    async function handlePost() {
         const btn = document.getElementById('submitBtn');
         const errBox = document.getElementById('errorMsg');
         const sucBox = document.getElementById('successMsg');
         errBox.innerText = '';
         sucBox.innerText = '';
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
 
-        if (!email || !password) {
-            errBox.innerText = 'Please enter email and password';
-            return;
-        }
+        if (!title) { errBox.innerText = 'Please enter a title'; return; }
+        if (!content) { errBox.innerText = 'Please enter content'; return; }
+        if (content.length < 10) { errBox.innerText = 'Content must be at least 10 characters'; return; }
 
         btn.disabled = true;
-        btn.innerText = 'Verifying...';
+        btn.innerText = 'Posting...';
 
         try {
-            const { data, error } = await client.auth.signInWithPassword({
-                email: email,
-                password: password
+            const { data: { session } } = await client.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const userId = session.user.id;
+            const username = session.user.user_metadata?.username || 'Anonymous';
+            const avatar = session.user.user_metadata?.avatar || '🌍';
+
+            // Upload images first (if any)
+            const imageUrls = await uploadImages(userId);
+
+            // Then insert post
+            const { error } = await client.from('posts').insert({
+                user_id: userId,
+                country_code: userCountry,
+                title: title,
+                content: content,
+                author_name: username,
+                author_avatar: avatar,
+                image_urls: imageUrls
             });
 
             if (error) throw error;
 
-            sucBox.innerText = 'Login successful! Redirecting...';
-            btn.innerText = 'Success ✓';
+            sucBox.innerText = 'Posted! Redirecting...';
+            btn.innerText = 'Posted ✓';
 
             setTimeout(() => {
                 window.location.href = 'index.html';
-            }, 1000);
+            }, 1500);
 
         } catch (error) {
-            errBox.innerText = 'Login failed: ' + (error.message || 'Invalid email or password');
+            errBox.innerText = 'Post failed: ' + (error.message || 'Please try again later');
             btn.disabled = false;
-            btn.innerText = 'Log In';
+            btn.innerText = 'Post to the World';
+            document.getElementById('uploadProgress').style.display = 'none';
         }
     }
 
-    // Enter key triggers login
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
+    init();
 </script>
 </body>
 </html>
