@@ -14,6 +14,8 @@
         .nav-search svg { width: 16px; height: 16px; color: #9ca3af; flex-shrink: 0; }
         .nav-search span { font-size: 13px; color: #b0b0b0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-badge { display: flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+        .user-badge.login-btn { background: #2563eb; color: white; cursor: pointer; transition: background 0.2s; }
+        .user-badge.login-btn:hover { background: #1d4ed8; }
         .country-tabs { background: white; padding: 12px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #f0f1f3; }
         .country-tabs::-webkit-scrollbar { display: none; }
         .tab { flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #6b7280; background: #f3f4f6; cursor: pointer; border: none; }
@@ -75,13 +77,13 @@ ba(37,99,235,0.3); cursor: pointer; }
         <span class="nav-icon">🏳️</span>
         <span class="nav-label">Countries</span>
     </div>
-    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
-    <div class="nav-item" onclick="window.location.href='messages.html'">
+    <div class="post-btn" onclick="requireLogin('post.html')">+</div>
+    <div class="nav-item" onclick="requireLogin('messages.html')">
         <span class="nav-icon">💬</span>
         <span class="nav-label">Messages</span>
         <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
     </div>
-    <div class="nav-item" onclick="window.location.href='profile.html'">
+    <div class="nav-item" onclick="requireLogin('profile.html')">
         <span class="nav-icon">👤</span>
         <span class="nav-label">Profile</span>
     </div>
@@ -95,6 +97,17 @@ ba(37,99,235,0.3); cursor: pointer; }
     );
     const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'IN': '🇮🇳 भारत', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국' };
     const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
+
+    let isLoggedIn = false;
+
+    // Login gate: redirect to login.html if not logged in
+    function requireLogin(targetUrl) {
+        if (isLoggedIn) {
+            window.location.href = targetUrl;
+        } else {
+            window.location.href = 'login.html';
+        }
+    }
 
     // ========================
     // Post sorting core logic
@@ -219,26 +232,45 @@ ba(37,99,235,0.3); cursor: pointer; }
     function buildTabs(userCountry) {
         const container = document.getElementById('countryTabs');
         const allCountries = Object.keys(countryMap);
-        const otherCountries = allCountries.filter(c => c !== userCountry);
 
-        // Tab 1: user's own country (active by default)
-        const userCountryLabel = countryMap[userCountry] || ('🌍 ' + userCountry);
-        let html = `<button class="tab active" onclick="filterPosts(this, '${userCountry}')">${userCountryLabel}</button>`;
-
-        // Tab 2: All
-        html += `<button class="tab" onclick="filterPosts(this, '')">🌍 All</button>`;
-
-        // Remaining tabs: other countries (excluding user's own)
-        otherCountries.forEach(c => {
-            html += `<button class="tab" onclick="filterPosts(this, '${c}')">${countryMap[c]}</button>`;
-        });
-
-        container.innerHTML = html;
+        if (userCountry) {
+            // Logged in: user's own country tab first (active by default)
+            const otherCountries = allCountries.filter(c => c !== userCountry);
+            const userCountryLabel = countryMap[userCountry] || ('🌍 ' + userCountry);
+            let html = `<button class="tab active" onclick="filterPosts(this, '${userCountry}')">${userCountryLabel}</button>`;
+            html += `<button class="tab" onclick="filterPosts(this, '')">🌍 All</button>`;
+            otherCountries.forEach(c => {
+                html += `<button class="tab" onclick="filterPosts(this, '${c}')">${countryMap[c]}</button>`;
+            });
+            container.innerHTML = html;
+        } else {
+            // Not logged in: "All" tab active by default
+            let html = `<button class="tab active" onclick="filterPosts(this, '')">🌍 All</button>`;
+            allCountries.forEach(c => {
+                html += `<button class="tab" onclick="filterPosts(this, '${c}')">${countryMap[c]}</button>`;
+            });
+            container.innerHTML = html;
+        }
     }
 
     async function init() {
         const { data: { session } } = await client.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
+
+        if (!session) {
+            // ===== Not logged in: allow browsing, show Login button =====
+            isLoggedIn = false;
+            const badge = document.getElementById('userBadge');
+            badge.innerText = '🔐 Login';
+            badge.classList.add('login-btn');
+            badge.onclick = function() { window.location.href = 'login.html'; };
+
+            buildTabs(null);
+            loadPosts('');
+            return;
+        }
+
+        // ===== Logged in: original behavior =====
+        isLoggedIn = true;
         const user = session.user;
         const username = user.user_metadata?.username || 'Not set';
         const avatar = user.user_metadata?.avatar || '🌍';
@@ -268,12 +300,10 @@ ba(37,99,235,0.3); cursor: pointer; }
                 loadPosts('');
             }
         } else {
-            // Default: load user's own country posts
             loadPosts(userCountry);
         }
 
         loadUnreadBadge();
-        // Refresh unread count every 60 seconds
         setInterval(loadUnreadBadge, 60000);
     }
 
