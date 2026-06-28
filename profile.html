@@ -3,88 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Voices</title>
+    <title>Login - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: #f5f6f8; min-height: 100vh; padding-bottom: 80px; }
-        .top-nav { background: white; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #f0f1f3; position: sticky; top: 0; z-index: 50; }
-        .logo { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0; }
-        .nav-search { flex: 1; display: flex; align-items: center; gap: 6px; background: #f3f4f6; border-radius: 20px; padding: 7px 14px; cursor: pointer; transition: background 0.2s; }
-        .nav-search:hover { background: #e8e9eb; }
-        .nav-search svg { width: 16px; height: 16px; color: #9ca3af; flex-shrink: 0; }
-        .nav-search span { font-size: 13px; color: #b0b0b0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-badge { display: flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
-        .country-tabs { background: white; padding: 12px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #f0f1f3; }
-        .country-tabs::-webkit-scrollbar { display: none; }
-        .tab { flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #6b7280; background: #f3f4f6; cursor: pointer; border: none; }
-        .tab.active { background: #1a1a2e; color: white; }
-        .feed { padding: 16px; }
-        .section-label { font-size: 12px; font-weight: 600; color: #9ca3af; letter-spacing: 1px; padding: 8px 4px; display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-        .post-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #f0f1f3; box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: box-shadow 0.2s; }
-        .post-card:active { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .post-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-        .flag { font-size: 18px; }
-        .post-country { font-size: 12px; color: #9ca3af; }
-        .post-time { font-size: 12px; color: #9ca3af; margin-left: auto; }
-        .post-author { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-        .author-avatar { width: 28px; height: 28px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; overflow: hidden; }
-        .author-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .author-name { font-size: 13px; font-weight: 600; color: #374151; }
-        .post-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; line-height: 1.4; }
-        .post-content { font-size: 14px; color: #4b5563; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .post-thumb { width: 100%; height: 160px; border-radius: 10px; margin-top: 10px; object-fit: cover; }
-        .post-footer { display: flex; align-items: center; gap: 16px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f5f5f5; }
-        .post-likes { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #9ca3af; }
-        .post-likes .like-icon { font-size: 14px; }
-        .post-likes.hot { color: #ef4444; font-weight: 600; }
-        .loading { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
-        .empty { text-align: center; padding: 40px; color: #9ca3af; font-size: 14px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f1f3; display: flex; justify-content: space-around; padding: 10px 0 20px; z-index: 50; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; position: relative; }
-        .nav-icon { font-size: 22px; color: #9ca3af; }
-        .nav-label { font-size: 10px; color: #9ca3af; }
-        .nav-item.active .nav-icon, .nav-item.active .nav-label { color: #2563eb; }
-        .nav-badge { position: absolute; top: 2px; right: 0px; background: #ef4444; color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; padding: 0 4px; border: 1.5px solid white; display: none; z-index: 10; }
-        .post-btn { width: 48px; height: 48px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; margin-top: -8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3); cursor: pointer; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; padding: 40px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 24px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo p { font-size: 12px; color: #6b7280; margin-top: 5px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
+        .form-input { width: 100%; padding: 14px 16px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 15px; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: #2563eb; }
+        .submit-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
+        .success-msg { color: #16a34a; font-size: 12px; margin-top: 15px; text-align: center; min-height: 15px; }
+        .bottom-link { text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280; }
+        .bottom-link a { color: #2563eb; text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
-<div class="top-nav">
-    <div class="logo">🌍 Global Voices</div>
-    <div class="nav-search" onclick="window.location.href='search.html'">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-        </svg>
-        <span>Search post titles…</span>
+<div class="card">
+    <div class="logo">
+        <h1>🌍 Global Voices</h1>
+        <p>Welcome back, the world is waiting</p>
     </div>
-    <div class="user-badge" id="userBadge">Loading...</div>
+    <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" class="form-input" placeholder="you@example.com">
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" class="form-input" placeholder="Enter your password">
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+    <button class="submit-btn" id="submitBtn" onclick="handleLogin()">Log In</button>
+    <div class="bottom-link" style="margin-top:20px;">Don't have an account? <a href="register.html">Sign up</a></div>
 </div>
-<div class="country-tabs" id="countryTabs"></div>
-<div class="feed">
-    <div class="section-label">🔥 Trending Posts</div>
-    <div id="postList"><div class="loading">Loading...</div></div>
-</div>
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="window.location.href='index.html'">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label">Discover</span>
-    </div>
-    <div class="nav-item" onclick="window.location.href='country.html'">
-        <span class="nav-icon">🏳️</span>
-        <span class="nav-label">Countries</span>
-    </div>
-    <div class="post-btn" onclick="window.location.href='post.html'">+</div>
-    <div class="nav-item" onclick="window.location.href='messages.html'">
-        <span class="nav-icon">💬</span>
-        <span class="nav-label">Messages</span>
-        <span class="nav-badge" id="unreadBadge" style="display:none;"></span>
-    </div>
-    <div class="nav-item" onclick="window.location.href='profile.html'">
-        <span class="nav-icon">👤</span>
-        <span class="nav-label">Profile</span>
-    </div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const { createClient } = supabase;
@@ -92,191 +50,51 @@
         'https://rkgwaucoldxpezwgjuoo.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrZ3dhdWNvbGR4cGV6d2dqdW9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMTI0OTYsImV4cCI6MjA5NzY4ODQ5Nn0.nwD1Uymq6b0CoYrezLBdypA8coUJJRDt_APjcaQ2094'
     );
-    const countryMap = { 'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本', 'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत' };
-    const flagMap = { 'CN': '🇨🇳', 'US': '🇺🇸', 'JP': '🇯🇵', 'DE': '🇩🇪', 'FR': '🇫🇷', 'KR': '🇰🇷', 'IN': '🇮🇳' };
 
-    // ========================
-    // Post sorting core logic
-    // Score = (likes + 1) × time factor
-    // ≤3 days=1.0, 3-7 days=0.06, >7 days=0.03
-    // ========================
-    function getTimeFactor(dateStr) {
-        const diff = Date.now() - new Date(dateStr).getTime();
-        const days = diff / 86400000;
-        if (days <= 3) return 1.0;
-        if (days <= 7) return 0.06;
-        return 0.03;
-    }
+    async function handleLogin() {
+        const btn = document.getElementById('submitBtn');
+        const errBox = document.getElementById('errorMsg');
+        const sucBox = document.getElementById('successMsg');
+        errBox.innerText = '';
+        sucBox.innerText = '';
 
-    function calculatePostScore(post) {
-        const likes = post.likes || 0;
-        return (likes + 1) * getTimeFactor(post.created_at);
-    }
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-    function sortPostsByScore(posts) {
-        return [...posts].sort((a, b) => calculatePostScore(b) - calculatePostScore(a));
-    }
-
-    function timeAgo(dateStr) {
-        const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
-        if (diff < 60) return 'just now';
-        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-        return Math.floor(diff/86400) + 'd ago';
-    }
-
-    function renderAvatar(post) {
-        const avatar = post.author_avatar;
-        if (avatar && avatar.startsWith('http')) {
-            return `<div class="author-avatar"><img src="${avatar}" alt=""></div>`;
+        if (!email || !password) {
+            errBox.innerText = 'Please enter email and password';
+            return;
         }
-        return `<div class="author-avatar">${avatar || '🌍'}</div>`;
-    }
 
-    async function loadPosts(countryFilter) {
-        const list = document.getElementById('postList');
-        list.innerHTML = '<div class="loading">Loading...</div>';
-        let query = client.from('posts').select('*').order('created_at', { ascending: false });
-        if (countryFilter) query = query.eq('country_code', countryFilter);
-        const { data, error } = await query;
-        if (error) { list.innerHTML = '<div class="empty">Failed to load. Please refresh.</div>'; return; }
-        if (!data || data.length === 0) { list.innerHTML = '<div class="empty">No posts yet. Be the first to post 🌍</div>'; return; }
+        btn.disabled = true;
+        btn.innerText = 'Verifying...';
 
-        const sorted = sortPostsByScore(data);
-
-        list.innerHTML = sorted.map(post => {
-            const likes = post.likes || 0;
-            const likeClass = likes >= 10 ? 'post-likes hot' : 'post-likes';
-            const thumbHtml = (post.image_urls && post.image_urls.length > 0)
-                ? `<img class="post-thumb" src="${post.image_urls[0]}" loading="lazy">`
-                : '';
-            return `
-            <div class="post-card" onclick="window.location.href='post-detail.html?id=${post.id}'">
-                <div class="post-meta">
-                    <span class="flag">${flagMap[post.country_code] || '🌍'}</span>
-                    <span class="post-country">${countryMap[post.country_code] || post.country_code}</span>
-                    <span class="post-time">${timeAgo(post.created_at)}</span>
-                </div>
-                <div class="post-author">
-                    ${renderAvatar(post)}
-                    <span class="author-name">${post.author_name || 'Anonymous'}</span>
-                </div>
-                <div class="post-title">${post.title}</div>
-                <div class="post-content">${post.content}</div>
-                ${thumbHtml}
-                <div class="post-footer">
-                    <div class="${likeClass}">
-                        <span class="like-icon">👍</span>
-                        <span>${likes}</span>
-                    </div>
-                </div>
-            </div>
-        `}).join('');
-    }
-
-    function filterPosts(btn, country) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-        loadPosts(country);
-    }
-
-    // ========== Unread badge ==========
-
-    async function loadUnreadBadge() {
         try {
-            const { data: { session } } = await client.auth.getSession();
-            if (!session) return;
-
-            const { count, error } = await client.from('notifications')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', session.user.id)
-                .eq('is_read', false);
-
-            if (error) {
-                console.error('[Unread badge] Query failed:', error.message);
-                return;
-            }
-
-            console.log('[Unread badge] Current unread:', count, 'user:', session.user.id);
-
-            const badge = document.getElementById('unreadBadge');
-            if (!badge) {
-                console.error('[Unread badge] #unreadBadge element not found');
-                return;
-            }
-            if (count && count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'inline-block';
-            } else {
-                badge.style.display = 'none';
-            }
-        } catch (e) {
-            console.error('[Unread badge] Error:', e);
-        }
-    }
-
-    function buildTabs(userCountry) {
-        const container = document.getElementById('countryTabs');
-        const allCountries = Object.keys(countryMap);
-        const otherCountries = allCountries.filter(c => c !== userCountry);
-
-        // Tab 1: user's own country (active by default)
-        const userCountryLabel = countryMap[userCountry] || ('🌍 ' + userCountry);
-        let html = `<button class="tab active" onclick="filterPosts(this, '${userCountry}')">${userCountryLabel}</button>`;
-
-        // Tab 2: All
-        html += `<button class="tab" onclick="filterPosts(this, '')">🌍 All</button>`;
-
-        // Remaining tabs: other countries (excluding user's own)
-        otherCountries.forEach(c => {
-            html += `<button class="tab" onclick="filterPosts(this, '${c}')">${countryMap[c]}</button>`;
-        });
-
-        container.innerHTML = html;
-    }
-
-    async function init() {
-        const { data: { session } } = await client.auth.getSession();
-        if (!session) { window.location.href = 'login.html'; return; }
-        const user = session.user;
-        const username = user.user_metadata?.username || 'Not set';
-        const avatar = user.user_metadata?.avatar || '🌍';
-        document.getElementById('userBadge').innerText = avatar + ' ' + username;
-
-        const userCountry = user.user_metadata?.country_code || 'CN';
-        buildTabs(userCountry);
-
-        // Check URL params, auto-switch to specified country tab
-        const params = new URLSearchParams(window.location.search);
-        const countryParam = params.get('country');
-        if (countryParam) {
-            const tabs = document.querySelectorAll('.tab');
-            let matched = false;
-            tabs.forEach(t => {
-                const onclick = t.getAttribute('onclick') || '';
-                if (onclick.includes("'" + countryParam + "'")) {
-                    t.classList.add('active');
-                    matched = true;
-                } else {
-                    t.classList.remove('active');
-                }
+            const { data, error } = await client.auth.signInWithPassword({
+                email: email,
+                password: password
             });
-            if (matched) {
-                loadPosts(countryParam);
-            } else {
-                loadPosts('');
-            }
-        } else {
-            // Default: load user's own country posts
-            loadPosts(userCountry);
-        }
 
-        loadUnreadBadge();
-        // Refresh unread count every 60 seconds
-        setInterval(loadUnreadBadge, 60000);
+            if (error) throw error;
+
+            sucBox.innerText = 'Login successful! Redirecting...';
+            btn.innerText = 'Success ✓';
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+
+        } catch (error) {
+            errBox.innerText = 'Login failed: ' + (error.message || 'Invalid email or password');
+            btn.disabled = false;
+            btn.innerText = 'Log In';
+        }
     }
 
-    init();
+    // Enter key triggers login
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
 </script>
 </body>
 </html>
