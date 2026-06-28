@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>发帖 - 全球声音</title>
+    <title>New Post - Global Voices</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: #f5f6f8; min-height: 100vh; padding: 20px; }
@@ -25,7 +25,7 @@
         .tip { background: #f8f9fb; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #6b7280; line-height: 1.6; margin-bottom: 20px; }
         .tip strong { color: #374151; }
 
-        /* ===== 图片上传相关 ===== */
+        /* ===== Image upload ===== */
         .image-upload-area { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .image-slot { width: 100px; height: 100px; border-radius: 12px; overflow: hidden; position: relative; flex-shrink: 0; }
         .image-slot img { width: 100%; height: 100%; object-fit: cover; }
@@ -42,45 +42,45 @@ shrink: 0; }
 <body>
     <div class="header">
         <span class="back-btn" onclick="window.location.href='index.html'">←</span>
-        <h2>发布帖子</h2>
+        <h2>New Post</h2>
     </div>
 
     <div class="card">
-        <div class="country-badge" id="countryBadge">🌍 加载中...</div>
+        <div class="country-badge" id="countryBadge">🌍 Loading...</div>
 
         <div class="tip">
-            <strong>发帖规则：</strong>你只能在自己的归属国板块发帖，但全球用户都可以回复你的帖子。
+            <strong>Posting rule:</strong> You can only post in your own country's section, but users worldwide can reply to your post.
         </div>
 
         <div class="form-group">
-            <label>帖子标题</label>
-            <input type="text" id="title" class="form-input" placeholder="用一句话概括你想聊的话题" maxlength="100">
+            <label>Post Title</label>
+            <input type="text" id="title" class="form-input" placeholder="Summarize your topic in one sentence" maxlength="100">
             <div class="char-count"><span id="titleCount">0</span>/100</div>
         </div>
 
         <div class="form-group">
-            <label>帖子内容</label>
-            <textarea id="content" class="form-input" placeholder="分享你的真实想法、经历或问题..."></textarea>
-            <div class="char-count"><span id="contentCount">0</span> 字</div>
+            <label>Post Content</label>
+            <textarea id="content" class="form-input" placeholder="Share your thoughts, experiences, or questions..."></textarea>
+            <div class="char-count"><span id="contentCount">0</span> characters</div>
         </div>
 
         <div class="form-group">
-            <label>添加图片（可选，最多3张）</label>
+            <label>Add Images (optional, up to 3)</label>
             <div class="image-upload-area" id="imageArea">
                 <div class="add-image-btn" id="addImageBtn" onclick="document.getElementById('imageInput').click()">
                     <span class="plus">+</span>
-                    <span class="text">添加图片</span>
+                    <span class="text">Add Image</span>
                 </div>
             </div>
             <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
-            <div class="image-hint">支持 JPG / PNG，单张最大 5MB，发帖前会自动压缩</div>
+            <div class="image-hint">Supports JPG / PNG, max 5MB each, auto-compressed before posting</div>
             <div class="upload-progress" id="uploadProgress"></div>
         </div>
 
         <div class="error-msg" id="errorMsg"></div>
         <div class="success-msg" id="successMsg"></div>
 
-        <button class="submit-btn" id="submitBtn" onclick="handlePost()">发布到全球</button>
+        <button class="submit-btn" id="submitBtn" onclick="handlePost()">Post to the World</button>
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -92,17 +92,17 @@ shrink: 0; }
     );
 
     const countryMap = {
-        'CN': '🇨🇳 中国', 'US': '🇺🇸 美国', 'JP': '🇯🇵 日本',
-        'DE': '🇩🇪 德国', 'FR': '🇫🇷 法国', 'KR': '🇰🇷 韩国', 'IN': '🇮🇳 印度'
+        'CN': '🇨🇳 中国', 'US': '🇺🇸 America', 'JP': '🇯🇵 日本',
+        'DE': '🇩🇪 Deutschland', 'FR': '🇫🇷 France', 'KR': '🇰🇷 한국', 'IN': '🇮🇳 भारत'
     };
 
     let userCountry = null;
     let currentUser = null;
-    let selectedImages = []; // 待上传的图片文件（已压缩）
+    let selectedImages = []; // Images to upload (compressed)
     const MAX_IMAGES = 3;
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-    // 页面加载时检查登录状态
+    // Check login status on page load
     async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) {
@@ -113,10 +113,10 @@ shrink: 0; }
         currentUser = session.user;
         userCountry = currentUser.user_metadata?.country_code || 'CN';
         const badge = document.getElementById('countryBadge');
-        badge.innerText = '📍 发帖板块：' + (countryMap[userCountry] || userCountry);
+        badge.innerText = '📍 Post section: ' + (countryMap[userCountry] || userCountry);
     }
 
-    // 字数统计
+    // Character count
     document.getElementById('title').addEventListener('input', function() {
         document.getElementById('titleCount').innerText = this.value.length;
     });
@@ -124,40 +124,40 @@ shrink: 0; }
         document.getElementById('contentCount').innerText = this.value.length;
     });
 
-    // ========== 图片选择与预览 ==========
+    // ========== Image selection & preview ==========
 
     document.getElementById('imageInput').addEventListener('change', async function(e) {
         const files = Array.from(e.target.files);
-        e.target.value = ''; // 清空，允许重复选同一文件
+        e.target.value = ''; // Clear, allow re-selecting same file
 
         for (const file of files) {
             if (selectedImages.length >= MAX_IMAGES) {
-                document.getElementById('errorMsg').innerText = `最多只能上传${MAX_IMAGES}张图片`;
+                document.getElementById('errorMsg').innerText = `You can upload up to ${MAX_IMAGES} images`;
                 setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
                 break;
             }
 
             if (!file.type.startsWith('image/')) {
-                document.getElementById('errorMsg').innerText = '只能选择图片文件';
+                document.getElementById('errorMsg').innerText = 'Only image files are allowed';
                 setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
                 continue;
             }
 
             if (file.size > MAX_FILE_SIZE) {
-                document.getElementById('errorMsg').innerText = `${file.name} 超过5MB限制`;
+                document.getElementById('errorMsg').innerText = `${file.name} exceeds 5MB limit`;
                 setTimeout(() => { document.getElementById('errorMsg').innerText = ''; }, 3000);
                 continue;
             }
 
-            // 压缩图片
+            // Compress image
             const compressed = await compressImage(file);
             selectedImages.push(compressed);
             renderImagePreviews();
         }
     });
 
-    // 客户端图片压缩（canvas 方案）
-    // 最大宽度 1200px，JPEG quality 0.8
+    // Client-side image compression (canvas approach)
+    // Max width 1200px, JPEG quality 0.8
     async function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -180,7 +180,6 @@ shrink: 0; }
                     ctx.drawImage(img, 0, 0, w, h);
 
                     canvas.toBlob(function(blob) {
-                        // 保留原始文件名后缀
                         const ext = file.name.split('.').pop().toLowerCase();
                         const name = 'img_' + Date.now() + '.' + (ext === 'png' ? 'png' : 'jpg');
                         resolve(new File([blob], name, { type: blob.type }));
@@ -210,7 +209,7 @@ shrink: 0; }
             html += `
                 <div class="add-image-btn" onclick="document.getElementById('imageInput').click()">
                     <span class="plus">+</span>
-                    <span class="text">添加图片</span>
+                    <span class="text">Add Image</span>
                 </div>
             `;
         }
@@ -223,7 +222,7 @@ shrink: 0; }
         renderImagePreviews();
     }
 
-    // ========== 上传图片到 Supabase Storage ==========
+    // ========== Upload images to Supabase Storage ==========
 
     async function uploadImages(userId) {
         if (selectedImages.length === 0) return [];
@@ -237,7 +236,7 @@ shrink: 0; }
             const ext = file.name.split('.').pop();
             const filePath = `${userId}/${Date.now()}_${i}.${ext}`;
 
-            progressEl.innerText = `上传图片 ${i + 1}/${selectedImages.length}...`;
+            progressEl.innerText = `Uploading image ${i + 1}/${selectedImages.length}...`;
 
             const { data, error } = await client.storage
                 .from('post-images')
@@ -245,7 +244,7 @@ shrink: 0; }
 
             if (error) throw error;
 
-            // 获取公开 URL
+            // Get public URL
             const { data: urlData } = client.storage
                 .from('post-images')
                 .getPublicUrl(filePath);
@@ -257,7 +256,7 @@ shrink: 0; }
         return urls;
     }
 
-    // ========== 发帖 ==========
+    // ========== Submit post ==========
 
     async function handlePost() {
         const btn = document.getElementById('submitBtn');
@@ -269,25 +268,25 @@ shrink: 0; }
         const title = document.getElementById('title').value.trim();
         const content = document.getElementById('content').value.trim();
 
-        if (!title) { errBox.innerText = '请填写帖子标题'; return; }
-        if (!content) { errBox.innerText = '请填写帖子内容'; return; }
-        if (content.length < 10) { errBox.innerText = '内容至少需要10个字'; return; }
+        if (!title) { errBox.innerText = 'Please enter a title'; return; }
+        if (!content) { errBox.innerText = 'Please enter content'; return; }
+        if (content.length < 10) { errBox.innerText = 'Content must be at least 10 characters'; return; }
 
         btn.disabled = true;
-        btn.innerText = '正在发布...';
+        btn.innerText = 'Posting...';
 
         try {
             const { data: { session } } = await client.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
 
             const userId = session.user.id;
-            const username = session.user.user_metadata?.username || '匿名用户';
+            const username = session.user.user_metadata?.username || 'Anonymous';
             const avatar = session.user.user_metadata?.avatar || '🌍';
 
-            // 先上传图片（如果有）
+            // Upload images first (if any)
             const imageUrls = await uploadImages(userId);
 
-            // 再写入帖子
+            // Then insert post
             const { error } = await client.from('posts').insert({
                 user_id: userId,
                 country_code: userCountry,
@@ -300,17 +299,17 @@ shrink: 0; }
 
             if (error) throw error;
 
-            sucBox.innerText = '发布成功！正在跳转...';
-            btn.innerText = '发布成功 ✓';
+            sucBox.innerText = 'Posted! Redirecting...';
+            btn.innerText = 'Posted ✓';
 
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
 
         } catch (error) {
-            errBox.innerText = '发布失败: ' + (error.message || '请稍后重试');
+            errBox.innerText = 'Post failed: ' + (error.message || 'Please try again later');
             btn.disabled = false;
-            btn.innerText = '发布到全球';
+            btn.innerText = 'Post to the World';
             document.getElementById('uploadProgress').style.display = 'none';
         }
     }
