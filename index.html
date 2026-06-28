@@ -60,15 +60,7 @@
     </div>
     <div class="user-badge" id="userBadge">Loading...</div>
 </div>
-<div class="country-tabs">
-    <button class="tab active" onclick="filterPosts(this, '')">🌍 All</button>
-    <button class="tab" onclick="filterPosts(this, 'CN')">🇨🇳 中国</button>
-    <button class="tab" onclick="filterPosts(this, 'US')">🇺🇸 America</button>
-    <button class="tab" onclick="filterPosts(this, 'JP')">🇯🇵 日本</button>
-    <button class="tab" onclick="filterPosts(this, 'DE')">🇩🇪 Deutschland</button>
-    <button class="tab" onclick="filterPosts(this, 'KR')">🇰🇷 한국</button>
-    <button class="tab" onclick="filterPosts(this, 'IN')">🇮🇳 भारत</button>
-</div>
+<div class="country-tabs" id="countryTabs"></div>
 <div class="feed">
     <div class="section-label">🔥 Trending Posts</div>
     <div id="postList"><div class="loading">Loading...</div></div>
@@ -223,6 +215,26 @@
         }
     }
 
+    function buildTabs(userCountry) {
+        const container = document.getElementById('countryTabs');
+        const allCountries = Object.keys(countryMap);
+        const otherCountries = allCountries.filter(c => c !== userCountry);
+
+        // Tab 1: user's own country (active by default)
+        const userCountryLabel = countryMap[userCountry] || ('🌍 ' + userCountry);
+        let html = `<button class="tab active" onclick="filterPosts(this, '${userCountry}')">${userCountryLabel}</button>`;
+
+        // Tab 2: All
+        html += `<button class="tab" onclick="filterPosts(this, '')">🌍 All</button>`;
+
+        // Remaining tabs: other countries (excluding user's own)
+        otherCountries.forEach(c => {
+            html += `<button class="tab" onclick="filterPosts(this, '${c}')">${countryMap[c]}</button>`;
+        });
+
+        container.innerHTML = html;
+    }
+
     async function init() {
         const { data: { session } } = await client.auth.getSession();
         if (!session) { window.location.href = 'login.html'; return; }
@@ -230,6 +242,9 @@
         const username = user.user_metadata?.username || 'Not set';
         const avatar = user.user_metadata?.avatar || '🌍';
         document.getElementById('userBadge').innerText = avatar + ' ' + username;
+
+        const userCountry = user.user_metadata?.country_code || 'CN';
+        buildTabs(userCountry);
 
         // Check URL params, auto-switch to specified country tab
         const params = new URLSearchParams(window.location.search);
@@ -252,7 +267,8 @@
                 loadPosts('');
             }
         } else {
-            loadPosts('');
+            // Default: load user's own country posts
+            loadPosts(userCountry);
         }
 
         loadUnreadBadge();
